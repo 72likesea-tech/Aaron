@@ -5,6 +5,7 @@ import TopicSelector from './components/TopicSelector';
 import SessionManager from './components/Session/SessionManager';
 import InterpretationView from './components/InterpretationView';
 import ErrorBanner from './components/UI/ErrorBanner';
+import AlarmManager from './components/AlarmManager';
 
 function AppContent() {
     const [screen, setScreen] = useState('settings'); // settings, topics, session
@@ -57,6 +58,7 @@ function AppContent() {
 function App() {
     return (
         <UserProvider>
+            <AlarmManager />
             <AppContent />
         </UserProvider>
     );

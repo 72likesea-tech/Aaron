@@ -2,13 +2,45 @@ import OpenAI from 'openai';
 
 const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
-const openai = new OpenAI({
+// Direct client for development only
+const directOpenAI = new OpenAI({
     apiKey: API_KEY,
-    dangerouslyAllowBrowser: true // Allowed for client-side demo
+    dangerouslyAllowBrowser: true
 });
 
-// Use gpt-4o-mini for speed and cost efficiency as requested
 const MODEL_NAME = "gpt-4o-mini";
+
+// Helper to switch between Proxy (Prod) and Direct (Dev)
+const callOpenAI = async (messages, max_tokens = 4000) => {
+    // In development mode, use direct SDK for speed/debugging ease
+    if (import.meta.env.DEV) {
+        const completion = await directOpenAI.chat.completions.create({
+            messages,
+            model: MODEL_NAME,
+            max_tokens,
+        });
+        return completion;
+    }
+
+    // In production (Vercel), use the serverless proxy
+    const response = await fetch('/api/proxy', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            messages,
+            model: MODEL_NAME,
+            max_tokens,
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Proxy error: ${response.statusText}`);
+    }
+
+    return await response.json();
+};
 
 export const OpenAIService = {
     // Generate topics based on user preferences and learning time
@@ -20,10 +52,9 @@ export const OpenAIService = {
       Return strictly a JSON array of objects with keys: id (number), type (string: Business/Casual/Deep), title (string), icon (emoji string).
       Do not wrap in markdown code blocks.`;
 
-            const completion = await openai.chat.completions.create({
-                messages: [{ role: "system", content: "You are a helpful English tutor." }, { role: "user", content: prompt }],
-                model: MODEL_NAME,
-            });
+            const completion = await callOpenAI(
+                [{ role: "system", content: "You are a helpful English tutor." }, { role: "user", content: prompt }]
+            );
 
             let text = completion.choices[0].message.content.trim();
             text = text.replace(/```json/g, '').replace(/```/g, '');
@@ -59,10 +90,9 @@ export const OpenAIService = {
       - tips: string (One sentence advice in English)
       Do not wrap in markdown code blocks.`;
 
-            const completion = await openai.chat.completions.create({
-                messages: [{ role: "system", content: "You are a helpful English tutor." }, { role: "user", content: prompt }],
-                model: MODEL_NAME,
-            });
+            const completion = await callOpenAI(
+                [{ role: "system", content: "You are a helpful English tutor." }, { role: "user", content: prompt }]
+            );
 
             let text = completion.choices[0].message.content.trim();
             text = text.replace(/```json/g, '').replace(/```/g, '');
@@ -104,10 +134,9 @@ export const OpenAIService = {
             Return a JSON object: { "isCorrect": boolean, "feedback": string (Korean, brief advice on pronunciation or missing words) }
             If it's mostly correct, say "Good job" or similar in feedback.`;
 
-            const completion = await openai.chat.completions.create({
-                messages: [{ role: "system", content: "You are a helpful pronunciation coach." }, { role: "user", content: prompt }],
-                model: MODEL_NAME,
-            });
+            const completion = await callOpenAI(
+                [{ role: "system", content: "You are a helpful pronunciation coach." }, { role: "user", content: prompt }]
+            );
 
             let text = completion.choices[0].message.content.trim();
             text = text.replace(/```json/g, '').replace(/```/g, '');
@@ -134,11 +163,10 @@ export const OpenAIService = {
             openAIMessages.push({ role: 'user', content: message });
             openAIMessages.unshift({ role: "system", content: "You are a friendly English conversation partner. Keep responses concise and engaging." });
 
-            const completion = await openai.chat.completions.create({
-                messages: openAIMessages,
-                model: MODEL_NAME,
-                max_tokens: 150,
-            });
+            const completion = await callOpenAI(
+                openAIMessages,
+                150 // max_tokens
+            );
 
             return completion.choices[0].message.content;
         } catch (error) {
@@ -177,11 +205,10 @@ export const OpenAIService = {
             Conversation:
             ${conversationText}`;
 
-            const completion = await openai.chat.completions.create({
-                messages: [{ role: "system", content: "You are an English teacher." }, { role: "user", content: prompt }],
-                model: MODEL_NAME,
-                max_tokens: 400,
-            });
+            const completion = await callOpenAI(
+                [{ role: "system", content: "You are an English teacher." }, { role: "user", content: prompt }],
+                400 // max_tokens
+            );
 
             let text = completion.choices[0].message.content.trim();
             // Handle markdown wrapping
@@ -205,13 +232,12 @@ export const OpenAIService = {
             
             Text: "${text}"`;
 
-            const completion = await openai.chat.completions.create({
-                messages: [
+            const completion = await callOpenAI(
+                [
                     { role: "system", content: "You are a professional simultaneous interpreter." },
                     { role: "user", content: prompt }
-                ],
-                model: MODEL_NAME,
-            });
+                ]
+            );
 
             return completion.choices[0].message.content.trim();
         } catch (error) {
