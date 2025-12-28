@@ -1,30 +1,26 @@
 import OpenAI from 'openai';
 
-export const config = {
-    runtime: 'edge', // Optional: Use Edge runtime for better performance if compatible, or stick to default (Node.js)
-};
+// Remove Edge runtime config to use standard Node.js Serverless Function
+// This ensures maximum compatibility with the OpenAI SDK
 
-export default async function handler(request) {
-    // Handle CORS preflight request
-    if (request.method === 'OPTIONS') {
-        return new Response(null, {
-            status: 200,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            },
-        });
+export default async function handler(req, res) {
+    // Handle CORS manully
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
+    // Handle Preflight
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
     }
 
-    if (request.method !== 'POST') {
-        return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-            status: 405,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            },
-        });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
@@ -32,15 +28,9 @@ export default async function handler(request) {
 
         if (!apiKey) {
             console.error('Missing OPENAI_API_KEY environment variable');
-            return new Response(JSON.stringify({
+            return res.status(500).json({
                 error: 'Server configuration error: Missing API Key',
                 hint: 'Please set OPENAI_API_KEY in Vercel Settings'
-            }), {
-                status: 500,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                },
             });
         }
 
@@ -48,8 +38,7 @@ export default async function handler(request) {
             apiKey: apiKey,
         });
 
-        const body = await request.json();
-        const { messages, model, max_tokens, temperature } = body;
+        const { messages, model, max_tokens, temperature } = req.body;
 
         const completion = await openai.chat.completions.create({
             messages,
@@ -58,24 +47,12 @@ export default async function handler(request) {
             temperature: temperature,
         });
 
-        return new Response(JSON.stringify(completion), {
-            status: 200,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            },
-        });
+        return res.status(200).json(completion);
     } catch (error) {
         console.error('OpenAI API Error:', error);
-        return new Response(JSON.stringify({
+        return res.status(500).json({
             error: 'Error processing request',
             details: error.message
-        }), {
-            status: 500,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            },
         });
     }
 }
