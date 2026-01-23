@@ -320,7 +320,11 @@ export const OpenAIService = {
                 body: formData
             });
 
-            if (!response.ok) throw new Error("Transcription Failed");
+            if (!response.ok) {
+                const errText = await response.text();
+                console.error("Transcription Server Error:", errText);
+                throw new Error("Transcription Failed");
+            }
             const data = await response.json();
             return data.text;
 

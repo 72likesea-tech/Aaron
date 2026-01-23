@@ -2,7 +2,6 @@ import OpenAI from 'openai';
 import formidable from 'formidable';
 import fs from 'fs';
 
-// Disable Vercel's default body parsing to handle multipart/form-data
 export const config = {
     api: {
         bodyParser: false,
@@ -10,7 +9,7 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-    // Handle CORS
+    // CORS Headers
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -31,33 +30,51 @@ export default async function handler(req, res) {
     try {
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) {
-            return res.status(500).json({ error: 'Missing API Key' });
+            console.error('SERVER ERROR: Missing OPENAI_API_KEY');
+            return res.status(500).json({ error: 'Server configuration error: Missing API Key' });
         }
 
         const openai = new OpenAI({ apiKey });
-
-        const form = formidable();
+        const form = formidable({});
 
         const [fields, files] = await new Promise((resolve, reject) => {
             form.parse(req, (err, fields, files) => {
-                if (err) reject(err);
+                if (err) {
+                    console.error('Formidable parsing error:', err);
+                    reject(err);
+                }
                 resolve([fields, files]);
             });
         });
 
-        const audioFile = files.file?.[0] || files.file; // formidable v3 returns arrays
+        const audioFile = Array.isArray(files.file) ? files.file[0] : files.file;
+
         if (!audioFile) {
+            console.error('No file found in request');
             return res.status(400).json({ error: 'No audio file provided' });
         }
 
+        console.log('Transcribing file:', audioFile.filepath || audioFile.path);
+
         const transcription = await openai.audio.transcriptions.create({
-            file: fs.createReadStream(audioFile.filepath),
+            file: fs.createReadStream(audioFile.filepath || audioFile.path),
             model: "whisper-1",
         });
 
-        return res.status(200).json(transcription);
+        // Clean up temp file
+        try {
+            fs.unlinkSync(audioFile.filepath || audioFile.path);
+        } catch (e) {
+            console.warn('Failed to delete temp file:', e);
+        }
+
+        return res.status(200).json({ text: transcription.text });
     } catch (error) {
-        console.error('Transcription API Error:', error);
-        return res.status(500).json({ error: error.message });
+        console.error('Transcription API Error Detail:', error);
+        return res.status(500).json({
+            error: 'Transcription API Internal Error',
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 }
