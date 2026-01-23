@@ -1,7 +1,8 @@
 import { Flag, Play, Target } from 'lucide-react';
+import BlindText from '../UI/BlindText';
 
 export default function MissionView({ data, onNext }) {
-  const { mission, scenario } = data || {};
+  const { mission, missionTranslation, scenario, scenarioTranslation } = data || {};
 
   return (
     <div className="mission-container">
@@ -11,6 +12,7 @@ export default function MissionView({ data, onNext }) {
         </div>
         <h1>오늘의 미션</h1>
         <p className="mission-text">{mission || "Master the conversation"}</p>
+        {missionTranslation && <BlindText text={missionTranslation} className="center-text" />}
       </header>
 
       <div className="scenario-card">
@@ -19,6 +21,7 @@ export default function MissionView({ data, onNext }) {
           <h3>상황 설정 (Scenario)</h3>
         </div>
         <p>{scenario || "Situation description..."}</p>
+        {scenarioTranslation && <BlindText text={scenarioTranslation} />}
       </div>
 
       <button className="primary-btn pulse-btn" onClick={onNext}>
@@ -26,6 +29,10 @@ export default function MissionView({ data, onNext }) {
       </button>
 
       <style>{`
+        .center-text {
+            text-align: center;
+            width: 100%;
+        }
         .mission-container {
           padding: 32px 24px;
           display: flex;

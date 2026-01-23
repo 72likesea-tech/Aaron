@@ -3,7 +3,6 @@ import { UserProvider } from './context/UserContext';
 import SettingsScreen from './components/SettingsScreen';
 import TopicSelector from './components/TopicSelector';
 import SessionManager from './components/Session/SessionManager';
-import InterpretationView from './components/InterpretationView';
 import ErrorBanner from './components/UI/ErrorBanner';
 import AlarmManager from './components/AlarmManager';
 
@@ -37,7 +36,6 @@ function AppContent() {
                 <TopicSelector
                     onSelect={handleTopicSelect}
                     onError={handleError}
-                    onInterpretationClick={() => setScreen('interpretation')}
                 />
             )}
             {screen === 'session' && (
@@ -46,9 +44,6 @@ function AppContent() {
                     onExit={handleExitSession}
                     onError={handleError}
                 />
-            )}
-            {screen === 'interpretation' && (
-                <InterpretationView onExit={() => setScreen('topics')} />
             )}
             <ErrorBanner message={error} onClose={() => setError(null)} />
         </>

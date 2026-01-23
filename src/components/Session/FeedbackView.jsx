@@ -31,6 +31,9 @@ export default function FeedbackView({ onNext, corrections }) {
                   <span className="text">"{item.correction}"</span>
                 </div>
                 <p className="reason">💡 {item.reason}</p>
+                {item.pronunciationTip && (
+                  <p className="pronunciation-tip">🗣️ <strong>Pronunciation Tip:</strong> {item.pronunciationTip}</p>
+                )}
               </div>
             ))}
           </div>
@@ -134,6 +137,13 @@ export default function FeedbackView({ onNext, corrections }) {
             justify-content: center;
             gap: 8px;
             margin-top: auto;
+        }
+        .pronunciation-tip {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+            font-size: 13px;
+            color: var(--accent-primary);
         }
       `}</style>
     </div>

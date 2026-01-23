@@ -1,42 +1,37 @@
 import { useState, useRef, useEffect } from 'react';
 import { Mic, Play, ArrowRight, RotateCcw } from 'lucide-react';
 import { OpenAIService } from '../../services/OpenAIService';
+import { useUser } from '../../context/UserContext';
 
 export default function ShadowingView({ data, onNext }) {
-  // Use data.shadowingSentences or fallback to keyExpressions text
-  const sentences = data?.shadowingSentences || data?.keyExpressions?.map(e => e.text) || ["Hello", "How are you?"];
+  // Determine sentences: data.shadowingSentences (new format) or mapped keyExpressions (fallback)
+  const rawSentences = data?.shadowingSentences || data?.keyExpressions || [];
+  const sentences = rawSentences.map(item => {
+    if (typeof item === 'string') return { text: item, translation: '' };
+    return { text: item.text, translation: item.translation || '' };
+  });
+
+  // Fallback if empty
+  if (sentences.length === 0) {
+    sentences.push({ text: "Hello", translation: "안녕하세요" });
+    sentences.push({ text: "How are you?", translation: "어떻게 지내세요?" });
+  }
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [feedback, setFeedback] = useState(null); // { isCorrect, feedback }
   const [transcript, setTranscript] = useState('');
 
   const recognition = useRef(null);
+  const { settings } = useUser();
+  const currentVoice = settings?.voice || 'shimmer';
+  const currentSpeed = settings?.speed || 100;
 
-  useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition.current = new SpeechRecognition();
-      recognition.current.continuous = false;
-      recognition.current.lang = 'en-US';
-      recognition.current.interimResults = true;
-
-      recognition.current.onresult = (event) => {
-        const current = event.resultIndex;
-        const t = event.results[current][0].transcript;
-        setTranscript(t);
-      };
-
-      recognition.current.onend = () => {
-        setIsListening(false);
-        if (transcript.trim()) {
-          assessSpeech(transcript);
-        }
-      };
-    }
-  }, [transcript, currentIndex]);
+  const currentSentence = sentences[currentIndex] || sentences[0];
 
   const assessSpeech = async (userSpeech) => {
-    const target = sentences[currentIndex];
+    if (!currentSentence) return;
+    const target = currentSentence.text;
     const result = await OpenAIService.assessPronunciation(target, userSpeech);
     setFeedback(result);
   };
@@ -52,11 +47,19 @@ export default function ShadowingView({ data, onNext }) {
     }
   };
 
-  const speakTarget = () => {
-    const text = sentences[currentIndex];
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    window.speechSynthesis.speak(utterance);
+  const speakTarget = async () => {
+    const text = currentSentence.text;
+    // Use OpenAI TTS instead of browser
+    const audioUrl = await OpenAIService.speak(text, currentVoice, currentSpeed);
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.play();
+    } else {
+      // Fallback
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    }
   };
 
   const handleNextSentence = () => {
@@ -69,6 +72,44 @@ export default function ShadowingView({ data, onNext }) {
     }
   };
 
+
+
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition.current = new SpeechRecognition();
+      recognition.current.continuous = false;
+      recognition.current.lang = 'en-US';
+      recognition.current.interimResults = true;
+      // Handlers attached dynamically or refs used?
+    }
+    return () => {
+      recognition.current?.stop();
+    }
+  }, []);
+
+  // Use refs for callbacks
+  const transcriptRef = useRef('');
+  useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
+
+  useEffect(() => {
+    if (!recognition.current) return;
+
+    recognition.current.onresult = (event) => {
+      const current = event.resultIndex;
+      const t = event.results[current][0].transcript;
+      setTranscript(t);
+    };
+
+    recognition.current.onend = () => {
+      setIsListening(false);
+      if (transcriptRef.current.trim()) {
+        assessSpeech(transcriptRef.current);
+      }
+    };
+  }, [assessSpeech]); // assessSpeech depends on currentSentence, so it changes.
+
+
   return (
     <div className="shadowing-step-container">
       <header className="step-header">
@@ -77,7 +118,10 @@ export default function ShadowingView({ data, onNext }) {
       </header>
 
       <div className="target-card">
-        <h3 className="target-text">{sentences[currentIndex]}</h3>
+        <h3 className="target-text">{currentSentence.text}</h3>
+        {currentSentence.translation && (
+          <p className="target-translation">{currentSentence.translation}</p>
+        )}
         <button className="play-btn" onClick={speakTarget}>
           <Play size={24} fill="currentColor" />
         </button>
@@ -135,6 +179,7 @@ export default function ShadowingView({ data, onNext }) {
             margin-top: 20px;
         }
         .target-text { font-size: 24px; font-weight: 500; line-height: 1.4; }
+        .target-translation { color: var(--text-secondary); font-size: 16px; margin-top: -16px; margin-bottom: 8px; }
         .play-btn {
             width: 56px;
             height: 56px;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '../../context/UserContext';
+import { MockAIService } from '../../services/MockAIService';
 import { OpenAIService } from '../../services/OpenAIService';
 import { X } from 'lucide-react';
 

@@ -1,30 +1,53 @@
 import { useState } from 'react';
-import { BookOpen, HelpCircle } from 'lucide-react';
+import { BookOpen, HelpCircle, Volume2 } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
-
-function BlindText({ text }) {
-  const [revealed, setRevealed] = useState(false);
-
-  return (
-    <p
-      className={`translation-sub ${revealed ? 'visible' : 'blind'}`}
-      onDoubleClick={() => setRevealed(true)}
-      onClick={(e) => {
-        const now = Date.now();
-        // Check if previous click was less than 300ms ago
-        if (e.target.lastClick && now - e.target.lastClick < 300) {
-          setRevealed(true);
-        }
-        e.target.lastClick = now;
-      }}
-    >
-      {revealed ? text : "Double tap to reveal / 더블 탭하여 보기"}
-    </p>
-  );
-}
+import { OpenAIService } from '../../services/OpenAIService';
+import BlindText from '../UI/BlindText';
 
 export default function LearningView({ data, onNext }) {
   const { keyExpressions, tips } = data || {};
+  const { settings } = useUser();
+  const [playingIndex, setPlayingIndex] = useState(null);
+
+  const playTwice = async (text, index) => {
+    if (playingIndex !== null) return; // Prevent overlapping playback
+    setPlayingIndex(index);
+
+    const voice = settings?.voice || 'shimmer';
+    const speed = settings?.speed || 100;
+
+    try {
+      const audioUrl = await OpenAIService.speak(text, voice, speed);
+      if (!audioUrl) {
+        // Fallback
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.onend = () => {
+          setTimeout(() => {
+            const u2 = new SpeechSynthesisUtterance(text);
+            u2.lang = 'en-US';
+            u2.onend = () => setPlayingIndex(null);
+            window.speechSynthesis.speak(u2);
+          }, 500);
+        };
+        window.speechSynthesis.speak(u);
+        return;
+      }
+
+      const audio = new Audio(audioUrl);
+      audio.onended = () => {
+        setTimeout(() => {
+          const audio2 = new Audio(audioUrl);
+          audio2.onended = () => setPlayingIndex(null);
+          audio2.play();
+        }, 500);
+      };
+      audio.play();
+    } catch (e) {
+      console.error(e);
+      setPlayingIndex(null);
+    }
+  };
 
   return (
     <div className="learning-container">
@@ -35,8 +58,11 @@ export default function LearningView({ data, onNext }) {
 
       <div className="card">
         {keyExpressions && keyExpressions.map((exp, i) => (
-          <div key={i} className="expression-item">
-            <h3>"{exp.text}"</h3>
+          <div key={i} className={`expression-item ${playingIndex === i ? 'playing' : ''}`} onClick={() => playTwice(exp.text, i)}>
+            <h3>
+              {playingIndex === i && <Volume2 size={16} className="pulsing-icon" />}
+              "{exp.text}"
+            </h3>
             <p>{exp.explanation}</p>
             <BlindText text={`(${exp.translation})`} />
           </div>
@@ -70,6 +96,7 @@ export default function LearningView({ data, onNext }) {
         }
         .section-header h2 {
           font-size: 18px;
+          color: var(--text-primary);
         }
         .card {
           background: var(--bg-card);
@@ -78,24 +105,34 @@ export default function LearningView({ data, onNext }) {
           display: flex;
           flex-direction: column;
           gap: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         .expression-item h3 {
-          color: var(--accent-primary);
-          margin-bottom: 4px;
+          color: #ffffff; /* Bright white for English text */
+          font-size: 18px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          letter-spacing: 0.5px;
         }
         .expression-item p {
-          color: var(--text-secondary);
+          color: #d1d5db; /* Light gray for explanation, better contrast than text-secondary */
           font-size: 14px;
+          line-height: 1.5;
         }
-        .expression-item {
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+        .expression-item p {
+          color: #d1d5db; /* Light gray for explanation, better contrast than text-secondary */
+          font-size: 14px;
+          line-height: 1.5;
         }
+        /* Removed duplicate expression-item style */
         .expression-item:last-child {
             border-bottom: none;
+            padding-bottom: 12px;
         }
         .question-card {
           border: 1px solid var(--accent-secondary);
+          background: rgba(118, 75, 162, 0.1);
         }
         .primary-btn {
           background: var(--accent-gradient);
@@ -104,36 +141,38 @@ export default function LearningView({ data, onNext }) {
           border-radius: var(--radius-md);
           font-weight: 700;
           margin-top: auto;
+          box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+          transition: transform 0.2s;
         }
-        .translation-sub {
-          font-size: 13px;
-          color: var(--accent-primary);
-          margin-top: 4px;
-          cursor: pointer;
-          transition: all 0.3s;
-          user-select: none;
-          min-height: 20px;
+        .primary-btn:active {
+            transform: scale(0.98);
         }
-        .translation-sub.blind {
-            background: rgba(255,255,255,0.1);
-            color: transparent;
-            text-shadow: 0 0 5px rgba(255,255,255,0.5);
-            border-radius: 4px;
-            padding: 2px 8px;
-            position: relative;
+        .expression-item {
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 8px;
+            padding: 12px;
         }
-        /* Mobile/Touch friendly visual hint for blind text */
-        .translation-sub.blind:after {
-            content: '?';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(255,255,255,0.3);
-            font-size: 10px;
+        .expression-item:hover {
+            background: rgba(255,255,255,0.05);
         }
-        .translation-sub.visible {
+        .expression-item.playing {
+            background: rgba(118, 75, 162, 0.1);
+            border: 1px solid var(--accent-primary);
+        }
+        .pulsing-icon {
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse-scale 1s infinite;
+            vertical-align: middle;
             color: var(--accent-primary);
+        }
+        @keyframes pulse-scale {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
         }
       `}</style>
     </div>

@@ -84,10 +84,13 @@ export const OpenAIService = {
       Context: ${complexity}.
       Return strictly a JSON object with:
       - mission: string (Goal of the session in English)
+      - missionTranslation: string (Korean translation of the mission)
       - scenario: string (Situation description in English)
+      - scenarioTranslation: string (Korean translation of the scenario)
       - keyExpressions: array of ${sentenceCount} objects { text: string (English sentence), translation: string (Korean), explanation: string (Korean nuance) }
-      - shadowingSentences: array of 3 strings (English sentences related to the topic for shadowing practice)
+      - shadowingSentences: array of 3 objects { text: string (English sentence), translation: string (Korean translation) }
       - tips: string (One sentence advice in English)
+      - freeTalkIntro: string (An engaging opening question for the free talk session in English, related to the topic)
       Do not wrap in markdown code blocks.`;
 
             const completion = await callOpenAI(
@@ -107,7 +110,9 @@ export const OpenAIService = {
             // Fallback data
             return {
                 mission: `Master the topic "${topic.title}" (Offline Mode)`,
+                missionTranslation: `주제 "${topic.title}" 마스터하기`,
                 scenario: "You are practicing specialized English expressions.",
+                scenarioTranslation: "전문적인 영어 표현을 연습하는 상황입니다.",
                 keyExpressions: [
                     {
                         text: "Could you elaborate on that?",
@@ -116,11 +121,12 @@ export const OpenAIService = {
                     }
                 ],
                 shadowingSentences: [
-                    "Could you elaborate on that?",
-                    "I see where you're coming from.",
-                    "That's a valid point."
+                    { text: "Could you elaborate on that?", translation: "그 부분에 대해 좀 더 자세히 말씀해 주시겠어요?" },
+                    { text: "I see where you're coming from.", translation: "어떤 입장이신지 이해가 갑니다." },
+                    { text: "That's a valid point.", translation: "일리가 있는 말씀이네요." }
                 ],
-                tips: "Focus on clear pronunciation and polite intonation."
+                tips: "Focus on clear pronunciation and polite intonation.",
+                freeTalkIntro: "What are your thoughts on this topic?"
             };
         }
     },
@@ -190,24 +196,25 @@ export const OpenAIService = {
                 return `${role}: ${text}`;
             }).join('\n');
 
-            const prompt = `Review this conversation and identify grammatical errors or awkward expressions used by the Student.
-            Ignore the AI's lines.
-            Focus ONLY on mistakes. If the student's sentence is perfect, ignore it.
-            
-            Return a strictly valid JSON array of objects.
+            const prompt = `Review this conversation between an AI Tutor and a Student. 
+            Analyze the Student's English for:
+            1. Grammatical errors
+            2. Awkward expressions (suggest more natural, native-like phrasing)
+            3. Potential pronunciation challenges based on the text (e.g. difficult words, linking).
+
+            Return a strictly valid JSON array of objects (top 5 most critical items).
             Each object must have:
-            - original: string (The student's exact wrong sentence)
-            - correction: string (Natural native correction)
-            - reason: string (Brief explanation in Korean)
-            
-            Limit to top 5 most important corrections.
-            
+            - original: string (The student's exact part of the sentence)
+            - correction: string (The natural/corrected version)
+            - reason: string (Brief explanation in Korean about grammar or nuance)
+            - pronunciationTip: string (Optional Korean tip on how to pronounce this better. e.g., "Note the 'th' sound in 'think'.")
+
             Conversation:
             ${conversationText}`;
 
             const completion = await callOpenAI(
-                [{ role: "system", content: "You are an English teacher." }, { role: "user", content: prompt }],
-                400 // max_tokens
+                [{ role: "system", content: "You are an expert English linguist and pronunciation coach." }, { role: "user", content: prompt }],
+                600 // max_tokens
             );
 
             let text = completion.choices[0].message.content.trim();
@@ -224,6 +231,105 @@ export const OpenAIService = {
             return [];
         }
     },
+    // Generate Speech (TTS)
+    speak: async (text, voice = 'shimmer', speedPercent = 100) => {
+        try {
+            // Map percentage (50-120) to OpenAI speed (0.7 - 1.2)
+            // 50% -> 0.75 (very slow & clear)
+            // 100% -> 1.0
+            // 120% -> 1.2
+            let speed = 1.0;
+            if (speedPercent <= 50) speed = 0.75;
+            else if (speedPercent >= 120) speed = 1.2;
+            else {
+                // Linear interpolation between 0.75 and 1.2?
+                // Actually, let's keep it simple:
+                // 50-99 -> map 0.75 to 1.0
+                // 100-120 -> map 1.0 to 1.2
+                if (speedPercent < 100) {
+                    speed = 0.75 + ((speedPercent - 50) / 50) * 0.25;
+                } else {
+                    speed = 1.0 + ((speedPercent - 100) / 20) * 0.2;
+                }
+            }
+
+            // Limit range strictly for API safety (0.25 to 4.0 is allowed, but we want natural range)
+            speed = Math.max(0.7, Math.min(1.3, speed));
+
+            if (import.meta.env.DEV) {
+                // Direct TTS for Dev
+                const mp3 = await directOpenAI.audio.speech.create({
+                    model: "tts-1",
+                    voice: voice,
+                    input: text,
+                    speed: speed,
+                });
+                const blob = await mp3.blob();
+                return URL.createObjectURL(blob);
+            }
+
+            // Production Proxy
+            const response = await fetch('/api/tts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, voice, speed }),
+            });
+            if (!response.ok) throw new Error("TTS Failed");
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+        } catch (error) {
+            console.error("OpenAI TTS error:", error);
+            return null; // Fallback will be handled by caller
+        }
+    },
+
+    // Transcript Audio (Whisper)
+    transcribeAudio: async (audioBlob) => {
+        try {
+            const file = new File([audioBlob], "input.webm", { type: "audio/webm" });
+
+            if (import.meta.env.DEV) {
+                const response = await directOpenAI.audio.transcriptions.create({
+                    file: file,
+                    model: "whisper-1",
+                });
+                return response.text;
+            }
+
+            // Production Proxy strategy (assumes formData support on endpoint, or need new endpoint)
+            // For now, let's assume we can post FormData to a transcription endpoint
+            // OR simpler: Since we don't have a backend proxy implemented for multipart yet in this context,
+            // we might stick to Direct for now if the user hasn't set up a full backend.
+            // BUT the user context implies a 'proxy' endpoint exists (`/api/proxy`).
+            // Handling multipart/form-data on generic JSON proxy is hard.
+            // Let's assume Dev mode / Direct is primary for this user (Localhost).
+            // If Prod, we need a specific endpoint. I'll implement a defensive error or attempt.
+
+            // NOTE: Current /api/proxy likely expects JSON. Uploading files requires different handling.
+            // I will implement Direct call logic for the immediate fix as most users here are local.
+            // If strictly needed, I'd create a /api/transcribe endpoint.
+            // For safety, I'll stick to the pattern but if Dev is detected (which is likely true for `npm run dev`) it works.
+
+            // Fallback for production if needed:
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('model', 'whisper-1');
+
+            const response = await fetch('/api/transcribe', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error("Transcription Failed");
+            const data = await response.json();
+            return data.text;
+
+        } catch (error) {
+            console.error("OpenAI Transcribe error:", error);
+            return "";
+        }
+    },
+
     // Simultaneous Interpretation
     interpret: async (text, sourceLang, targetLang) => {
         try {

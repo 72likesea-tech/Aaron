@@ -1,5 +1,5 @@
 import { useUser } from '../context/UserContext';
-import { Clock, Settings, Zap, BarChart } from 'lucide-react';
+import { Clock, Settings, Zap, BarChart, Mic } from 'lucide-react';
 import TimeDial from './UI/TimeDial';
 
 export default function SettingsScreen({ onStart }) {
@@ -58,15 +58,36 @@ export default function SettingsScreen({ onStart }) {
       </div>
 
       <div className="card">
-        <label className="section-label"><Zap size={18} /> 말하기 속도</label>
-        <div className="toggle-group">
-          {speeds.map(s => (
+        <label className="section-label"><Zap size={18} /> 말하기 속도 ({settings.speed}%)</label>
+        <div className="range-control">
+          <span className="speed-label">천천히 (또렷하게)</span>
+          <input
+            type="range"
+            min="50"
+            max="120"
+            step="5"
+            value={settings.speed}
+            onChange={(e) => updateSettings('speed', Number(e.target.value))}
+            style={{ flex: 1 }}
+          />
+          <span className="speed-label">빠르게</span>
+        </div>
+      </div>
+
+      <div className="card">
+        <label className="section-label"><Mic size={18} /> AI 목소리</label>
+        <div className="voice-grid">
+          {['alloy', 'echo', 'shimmer', 'onyx'].map(v => (
             <button
-              key={s}
-              className={`toggle-btn ${settings.speed === s ? 'active' : ''}`}
-              onClick={() => updateSettings('speed', s)}
+              key={v}
+              className={`voice-btn ${settings.voice === v ? 'active' : ''}`}
+              onClick={() => {
+                updateSettings('voice', v);
+                // Preview sound? Maybe later.
+              }}
             >
-              {s}
+              <div className="voice-icon">{v[0].toUpperCase()}</div>
+              <span className="voice-name">{v === 'shimmer' ? 'Sol (Shimmer)' : v.charAt(0).toUpperCase() + v.slice(1)}</span>
             </button>
           ))}
         </div>
@@ -184,6 +205,49 @@ export default function SettingsScreen({ onStart }) {
         }
         .icon-btn:active {
           background: var(--accent-primary);
+        }
+        
+        .voice-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .voice-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .voice-btn.active {
+            background: rgba(118, 75, 162, 0.1);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+        .voice-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--accent-primary);
+        }
+        .voice-btn.active .voice-icon {
+            background: var(--accent-primary);
+            color: white;
+        }
+        .voice-name {
+            font-size: 14px;
+            font-weight: 500;
         }
       `}</style>
     </div>

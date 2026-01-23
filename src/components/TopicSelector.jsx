@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { OpenAIService } from '../services/OpenAIService';
+import { MockAIService } from '../services/MockAIService';
 import { useUser } from '../context/UserContext';
 import { RefreshCw, ArrowRight } from 'lucide-react';
 
@@ -11,7 +11,7 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
   const loadTopics = async () => {
     setLoading(true);
     try {
-      const data = await OpenAIService.generateTopics('general', settings.learningTime);
+      const data = await MockAIService.generateTopics('general', settings.learningTime);
       if (data && data.length > 0) {
         setTopics(data);
       } else {
@@ -58,6 +58,7 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
               <div className="topic-info">
                 <span className="topic-type">{topic.type}</span>
                 <h3>{topic.title}</h3>
+                {topic.source && <span className="topic-source">{topic.source}</span>}
               </div>
               <ArrowRight size={20} color="var(--text-secondary)" />
             </div>
@@ -72,10 +73,6 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
 
       <button className="secondary-btn" onClick={loadTopics} disabled={loading}>
         <RefreshCw size={18} /> 주제 다시 생성하기
-      </button>
-
-      <button className="primary-btn" onClick={onInterpretationClick}>
-        <ArrowRight size={18} /> 실시간 동시통역 모드
       </button>
 
       <style>{`
@@ -135,18 +132,29 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
         }
         .topic-info {
           flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
         }
         .topic-type {
-          font-size: 12px;
+          font-size: 11px;
           color: var(--accent-secondary);
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          font-weight: 600;
+          font-weight: 700;
+          color: #a78bfa; /* Improved contrast */
+        }
+        .topic-source {
+          font-size: 12px;
+          color: #34d399; /* Distinct color for source */
+          font-weight: 500;
+          margin-top: 2px;
         }
         .topic-info h3 {
           font-size: 16px;
           font-weight: 500;
-          margin-top: 4px;
+          line-height: 1.4;
+          color: #ffffff;
         }
         .secondary-btn {
           background: transparent;
@@ -161,26 +169,8 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
           font-weight: 500;
           transition: all 0.2s;
         }
+        .secondary-btn:hover {
           background: rgba(255,255,255,0.05);
-        }
-        .primary-btn {
-          background: var(--accent-gradient);
-          color: white;
-          border: none;
-          padding: 16px;
-          border-radius: var(--radius-md);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          font-weight: 600;
-          font-size: 16px;
-          transition: all 0.2s;
-          box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
-        }
-        .primary-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(118, 75, 162, 0.4);
         }
       `}</style>
     </div>

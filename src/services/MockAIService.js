@@ -2,25 +2,35 @@
 
 const TOPIC_TEMPLATES = {
     business: [
-        "Negotiating a new software contract",
-        "Presenting Q3 sales results",
-        "Discussing product roadmap with stakeholders",
-        "Handling a customer complaint about delivery",
-        "Interviewing for a Project Manager role"
+        { title: "Negotiating a new software contract" },
+        { title: "Presenting Q3 sales results" },
+        { title: "Discussing product roadmap with stakeholders" },
+        { title: "Handling a customer complaint about delivery" },
+        { title: "Interviewing for a Project Manager role" }
     ],
-    casual: [
-        "Discussing weekend hiking plans",
-        "Recommending a favorite restaurant",
-        "Talking about a new Netflix series",
-        "Explaining a Korean traditional holiday",
-        "Asking for advice on a relationship issue"
+    casual_standard: [
+        { title: "Discussing weekend hiking plans" },
+        { title: "Recommending a favorite restaurant" },
+        { title: "Talking about a new Netflix series" },
+        { title: "Explaining a Korean traditional holiday" },
+        { title: "Asking for advice on a relationship issue" }
+    ],
+    casual_movie: [
+        { title: "I love you 3000.", source: "Avengers: Endgame (2019)" },
+        { title: "This is the way.", source: "The Mandalorian (2019)" },
+        { title: "Be curious, not judgmental.", source: "Ted Lasso (2020)" },
+        { title: "I can do this all day.", source: "Captain America: Civil War (2016)" },
+        { title: "Whatever it takes.", source: "Avengers: Endgame (2019)" },
+        { title: "We are the spark, that will light the fire that'll burn the First Order down.", source: "Star Wars: The Last Jedi (2017)" },
+        { title: "Just let me go. It's okay.", source: "Black Widow (2021)" },
+        { title: "I have nothing to prove to you.", source: "Captain Marvel (2019)" }
     ],
     deep: [
-        "Debating the ethics of AI development",
-        "Discussing climate change solutions",
-        "Analyzing the impact of remote work on society",
-        "Exploring the future of space travel",
-        "Talking about economic inequality"
+        { title: "Debating the ethics of AI development" },
+        { title: "Discussing climate change solutions" },
+        { title: "Analyzing the impact of remote work on society" },
+        { title: "Exploring the future of space travel" },
+        { title: "Talking about economic inequality" }
     ]
 };
 
@@ -29,12 +39,23 @@ export const MockAIService = {
         await new Promise(resolve => setTimeout(resolve, 1000));
         const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+        // Helper to format topic object
+        const createTopic = (type, template, icon) => ({
+            id: Math.random().toString(36).substr(2, 9),
+            type: type,
+            title: template.title,
+            source: template.source || null,
+            icon: icon
+        });
+
         return [
-            { id: 1, type: 'Business', title: getRandom(TOPIC_TEMPLATES.business), icon: '💼' },
-            { id: 2, type: 'Casual', title: getRandom(TOPIC_TEMPLATES.casual), icon: '☕' },
-            { id: 3, type: 'Casual', title: getRandom(TOPIC_TEMPLATES.casual), icon: '✈️' },
-            { id: 4, type: 'Deep', title: getRandom(TOPIC_TEMPLATES.deep), icon: '🌍' },
-            { id: 5, type: 'Deep', title: getRandom(TOPIC_TEMPLATES.deep), icon: '🧠' },
+            createTopic('Business', getRandom(TOPIC_TEMPLATES.business), '💼'),
+            // Casual 1: Movie/Drama Quote
+            createTopic('Casual', getRandom(TOPIC_TEMPLATES.casual_movie), '🎬'),
+            // Casual 2: Standard Topic
+            createTopic('Casual', getRandom(TOPIC_TEMPLATES.casual_standard), '☕'),
+            createTopic('Deep', getRandom(TOPIC_TEMPLATES.deep), '🌍'),
+            createTopic('Deep', getRandom(TOPIC_TEMPLATES.deep), '🧠'),
         ];
     },
 
@@ -42,7 +63,9 @@ export const MockAIService = {
         await new Promise(resolve => setTimeout(resolve, 800));
         return {
             mission: `Master the conversation about "${topic.title}"`,
+            missionTranslation: `"${topic.title}"에 대한 대화를 마스터하세요`,
             scenario: "You are meeting a colleague/friend in a quiet cafe.",
+            scenarioTranslation: "조용한 카페에서 동료/친구를 만나는 상황입니다.",
             keyExpressions: [
                 {
                     text: "Could you elaborate on that?",
@@ -91,5 +114,29 @@ export const MockAIService = {
             text: `That's interesting! You said "${message}". Tell me more about that.`,
             correction: null
         };
+    },
+
+    generateConversationFeedback: async (history) => {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Mock feedback
+        return [
+            {
+                original: "I am boring.",
+                correction: "I am bored.",
+                reason: "'Boring'은 지루하게 만드는 사람을 의미하고, 감정을 느낄 때는 'bored'를 씁니다.",
+                pronunciationTip: "Pay attention to the 'd' ending in 'bored' vs 'boredom'."
+            },
+            {
+                original: "I go to home.",
+                correction: "I go home.",
+                reason: "'Home'은 부사로 사용될 때 전치사 'to'를 사용하지 않습니다.",
+                pronunciationTip: null
+            },
+            {
+                original: "She don't like it.",
+                correction: "She doesn't like it.",
+                reason: "3인칭 단수 주어 뒤에는 'doesn't'를 사용해야 합니다."
+            }
+        ];
     }
 };

@@ -12,8 +12,9 @@ export function UserProvider({ children }) {
             learningTime: 30, // minutes
             alarmTime: '09:00',
             level: 'Intermediate',
-            speed: 'Normal',
+            speed: 100, // percentage
             showTranslation: false,
+            voice: 'shimmer', // Default to 'shimmer' (Sol-like)
         };
     });
 
