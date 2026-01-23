@@ -2,6 +2,8 @@ import OpenAI from 'openai';
 import formidable from 'formidable';
 import fs from 'fs';
 
+// Force redeploy: 2026-01-23 19:17
+
 export const config = {
     api: {
         bodyParser: false,
