@@ -15,6 +15,9 @@ export function UserProvider({ children }) {
             speed: 100, // percentage
             showTranslation: false,
             voice: 'shimmer', // Default to 'shimmer' (Sol-like)
+            themeMode: 'light', // 'light' or 'dark'
+            customBgColor: '#ffffff',
+            customTextColor: '#1a1a1a',
         };
     });
 

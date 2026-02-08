@@ -109,21 +109,22 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
           padding: 16px;
           border-radius: var(--radius-md);
           display: flex;
+          flex-direction: center;
           align-items: center;
           gap: 16px;
           cursor: pointer;
           transition: transform 0.2s, background 0.2s;
-          border: 1px solid transparent;
+          border: 1px solid rgba(128,128,128,0.1);
         }
         .topic-card:hover {
           transform: translateY(-2px);
           border-color: var(--accent-primary);
-          background: #ffffff;
+          background: var(--bg-secondary);
           box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
         .topic-icon {
           font-size: 24px;
-          background: rgba(255,255,255,0.05);
+          background: rgba(128,128,128,0.1);
           width: 48px;
           height: 48px;
           display: flex;

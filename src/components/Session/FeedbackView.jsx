@@ -54,39 +54,39 @@ export default function FeedbackView({ onNext, corrections }) {
           gap: 32px;
           height: 100vh;
           overflow-y: auto;
-          background: #ffffff;
-          color: #1a1a1a;
+          background: var(--bg-main);
+          color: var(--text-primary);
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         .header { text-align: center; margin-bottom: 8px; }
         .header h1 { 
-          color: #1a1a1a;
+          color: var(--text-primary);
           margin-bottom: 8px; 
           font-size: 32px;
           font-weight: 800;
           letter-spacing: -0.5px;
         }
         .header p { 
-          color: #666666;
+          color: var(--text-secondary);
           font-size: 18px; 
           font-weight: 400;
         }
         
         .summary-card {
-            background: #f8fafc;
+            background: var(--bg-card);
             padding: 40px;
             border-radius: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 16px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(128,128,128,0.2);
         }
         .score-circle {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: #2563eb;
+            background: var(--accent-primary);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -97,12 +97,12 @@ export default function FeedbackView({ onNext, corrections }) {
         }
         .summary-card h3 {
           font-size: 24px;
-          color: #1e293b;
+          color: var(--text-primary);
           margin: 0;
         }
         .summary-card p {
           font-size: 16px;
-          color: #64748b;
+          color: var(--text-secondary);
           margin: 0;
         }
         
@@ -112,7 +112,7 @@ export default function FeedbackView({ onNext, corrections }) {
             align-items: center;
             gap: 10px;
             margin-bottom: 24px;
-            color: #1e293b;
+            color: var(--text-primary);
             font-weight: 700;
         }
         .corrections-list {
@@ -121,8 +121,8 @@ export default function FeedbackView({ onNext, corrections }) {
             gap: 24px;
         }
         .correction-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            background: var(--bg-card);
+            border: 1px solid rgba(128,128,128,0.2);
             padding: 24px;
             border-radius: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -131,35 +131,35 @@ export default function FeedbackView({ onNext, corrections }) {
         .correction-label {
             font-size: 13px;
             font-weight: 700;
-            color: #94a3b8;
+            color: var(--text-secondary);
             text-transform: uppercase;
             margin-bottom: 8px;
             display: block;
         }
 
         .bad-box {
-            background: #fff5f5;
+            background: rgba(239, 68, 68, 0.1);
             padding: 16px;
             border-radius: 12px;
             margin-bottom: 16px;
-            border-left: 4px solid #feb2b2;
+            border-left: 4px solid var(--error);
         }
         .correction-card .bad-text {
-            color: #c53030;
+            color: var(--error);
             font-size: 17px;
             line-height: 1.5;
             display: block;
         }
 
         .good-box {
-            background: #f0f9ff;
+            background: rgba(37, 99, 235, 0.1);
             padding: 16px;
             border-radius: 12px;
             margin-bottom: 16px;
-            border-left: 4px solid #2563eb;
+            border-left: 4px solid var(--accent-primary);
         }
         .correction-card .good-text {
-            color: #2563eb;
+            color: var(--accent-primary);
             font-weight: 700;
             font-size: 19px;
             line-height: 1.5;
@@ -168,29 +168,30 @@ export default function FeedbackView({ onNext, corrections }) {
 
         .reason {
             font-size: 15px;
-            color: #475569;
+            color: var(--text-primary);
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 1px solid #f1f5f9;
+            border-top: 1px solid rgba(128,128,128,0.1);
             line-height: 1.6;
+            opacity: 0.9;
         }
 
         .pronunciation-tip {
             margin-top: 12px;
             padding: 12px;
-            background: #f8fafc;
+            background: var(--bg-card);
             border-radius: 12px;
             font-size: 15px;
-            color: #64748b;
+            color: var(--text-secondary);
             line-height: 1.6;
         }
         .pronunciation-tip strong {
-          color: #1e293b;
+          color: var(--text-primary);
         }
 
         .primary-btn {
-            background: #1a1a1a;
-            color: white;
+            background: var(--text-primary);
+            color: var(--bg-main);
             padding: 18px;
             border-radius: 16px;
             font-weight: 700;

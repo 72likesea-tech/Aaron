@@ -112,13 +112,13 @@ export default function LearningView({ data, onNext }) {
             border: 1px solid #e2e8f0;
         }
         .card {
-          background: #ffffff;
+          background: var(--bg-main);
           padding: 24px;
           border-radius: var(--radius-lg);
           display: flex;
           flex-direction: column;
           gap: 16px;
-          border: 1px solid #e2e8f0;
+          border: 1px solid rgba(128,128,128,0.2);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         .expression-item h3 {
@@ -129,13 +129,8 @@ export default function LearningView({ data, onNext }) {
           letter-spacing: 0.5px;
         }
         .expression-item p {
-          color: #d1d5db; /* Light gray for explanation, better contrast than text-secondary */
-          font-size: 14px;
-          line-height: 1.5;
-        }
-        .expression-item p {
-          color: #d1d5db; /* Light gray for explanation, better contrast than text-secondary */
-          font-size: 14px;
+          color: var(--text-secondary);
+          font-size: 15px;
           line-height: 1.5;
         }
         /* Removed duplicate expression-item style */
@@ -145,7 +140,7 @@ export default function LearningView({ data, onNext }) {
         }
         .question-card {
           border: 1px solid var(--accent-secondary);
-          background: rgba(118, 75, 162, 0.1);
+          background: rgba(118, 75, 162, 0.05);
         }
         .primary-btn {
           background: var(--accent-gradient);
@@ -162,17 +157,17 @@ export default function LearningView({ data, onNext }) {
         }
         .expression-item {
             padding-bottom: 20px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid rgba(128,128,128,0.1);
             cursor: pointer;
             transition: background 0.2s;
             border-radius: 12px;
             padding: 16px;
         }
         .expression-item:hover {
-            background: rgba(255,255,255,0.05);
+            background: rgba(128,128,128,0.05);
         }
         .expression-item.playing {
-            background: rgba(118, 75, 162, 0.1);
+            background: rgba(37, 99, 235, 0.1);
             border: 1px solid var(--accent-primary);
         }
         .pulsing-icon {

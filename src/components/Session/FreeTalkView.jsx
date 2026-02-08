@@ -309,19 +309,19 @@ export default function FreeTalkView({ data, onNext }) {
           display: flex;
           flex-direction: column;
           height: 100%;
-          background: #ffffff;
+          background: var(--bg-main);
         }
         .chat-header {
             padding: 20px 16px;
-            background: #ffffff;
-            border-bottom: 1px solid #f1f5f9;
+            background: var(--bg-main);
+            border-bottom: 1px solid rgba(128,128,128,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .chat-header h2 { font-size: 18px; color: #1e293b; font-weight: 700; }
-        .live { color: #10b981; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 4px; }
-        .paused { color: #94a3b8; font-size: 13px; font-weight: 500; }
+        .chat-header h2 { font-size: 18px; color: var(--text-primary); font-weight: 700; }
+        .live { color: var(--success); font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 4px; }
+        .paused { color: var(--text-secondary); font-size: 13px; font-weight: 500; }
         
         .chat-window {
             flex: 1;
@@ -330,7 +330,7 @@ export default function FreeTalkView({ data, onNext }) {
             display: flex;
             flex-direction: column;
             gap: 16px;
-            background: #f8fafc;
+            background: var(--bg-card);
         }
         .message {
             display: flex;
@@ -343,25 +343,25 @@ export default function FreeTalkView({ data, onNext }) {
         .avatar {
           width: 32px;
           height: 32px;
-          background: #e2e8f0;
+          background: var(--bg-secondary);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 12px;
           font-weight: 700;
-          color: #64748b;
+          color: var(--text-secondary);
         }
 
         .message.ai .bubble {
-            background: #ffffff;
-            color: #1e293b;
-            border: 1px solid #e2e8f0;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            border: 1px solid rgba(128,128,128,0.2);
             border-top-left-radius: 4px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         .message.user .bubble {
-            background: #2563eb;
+            background: var(--accent-primary);
             color: #ffffff;
             border-bottom-right-radius: 4px;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
@@ -377,14 +377,14 @@ export default function FreeTalkView({ data, onNext }) {
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #64748b;
+            color: var(--text-secondary);
             font-size: 14px;
             background: transparent;
         }
         .recording-dot {
             width: 10px;
             height: 10px;
-            background: #ef4444;
+            background: var(--error);
             border-radius: 50%;
             animation: blink 1s infinite;
         }
@@ -393,13 +393,13 @@ export default function FreeTalkView({ data, onNext }) {
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #64748b;
+            color: var(--text-secondary);
             font-size: 14px;
         }
         
         .error-message {
-            background: #fef2f2;
-            color: #b91c1c;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
             padding: 12px;
             border-radius: 12px;
             font-size: 14px;
@@ -407,13 +407,13 @@ export default function FreeTalkView({ data, onNext }) {
             align-items: center;
             gap: 8px;
             justify-content: center;
-            border: 1px solid #fee2e2;
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
         .controls-area {
             padding: 32px 24px;
-            background: #ffffff;
-            border-top: 1px solid #f1f5f9;
+            background: var(--bg-main);
+            border-top: 1px solid rgba(128,128,128,0.1);
             display: flex;
             justify-content: center;
         }
@@ -433,15 +433,15 @@ export default function FreeTalkView({ data, onNext }) {
             font-size: 16px;
             font-weight: 600;
         }
-        .status-text.listening { color: #10b981; }
-        .status-text.speaking { color: #2563eb; }
+        .status-text.listening { color: var(--success); }
+        .status-text.speaking { color: var(--accent-primary); }
         .status-text.transcribing { color: #f59e0b; }
 
         .large-done-btn {
             width: 100%;
             max-width: 320px;
-            background: #1e293b;
-            color: #ffffff;
+            background: var(--text-primary);
+            color: var(--bg-main);
             border: none;
             padding: 20px;
             border-radius: 16px;
@@ -465,13 +465,13 @@ export default function FreeTalkView({ data, onNext }) {
             gap: 12px;
             background: transparent;
             border: none;
-            color: #64748b;
+            color: var(--text-secondary);
             cursor: pointer;
         }
-        .icon-btn.start { color: #2563eb; }
+        .icon-btn.start { color: var(--accent-primary); }
         .icon-btn.start svg {
-            background: #eff6ff;
-            color: #2563eb;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent-primary);
             padding: 16px;
             border-radius: 50%;
             width: 72px;
@@ -493,14 +493,14 @@ export default function FreeTalkView({ data, onNext }) {
         }
         
         .finish-link {
-            background: #f8fafc;
+            background: var(--bg-card);
             border: none;
-            color: #64748b;
+            color: var(--text-secondary);
             padding: 20px;
             font-size: 14px;
             font-weight: 600;
             text-decoration: none;
-            border-top: 1px solid #f1f5f9;
+            border-top: 1px solid rgba(128,128,128,0.1);
             width: 100%;
             text-align: center;
         }
@@ -508,7 +508,7 @@ export default function FreeTalkView({ data, onNext }) {
         .speaking-spacer {
             height: 24px;
             font-size: 14px;
-            color: #94a3b8;
+            color: var(--text-secondary);
         }
       `}</style>
         </div>

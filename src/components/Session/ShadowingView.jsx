@@ -166,12 +166,12 @@ export default function ShadowingView({ data, onNext }) {
         .step-header p { color: var(--text-secondary); font-size: 14px; }
 
         .target-card {
-            background: #ffffff;
+            background: var(--bg-main);
             padding: 32px;
             border-radius: var(--radius-lg);
             width: 100%;
             text-align: center;
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(128,128,128,0.2);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -179,13 +179,13 @@ export default function ShadowingView({ data, onNext }) {
             margin-top: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
-        .target-text { font-size: 24px; font-weight: 500; line-height: 1.4; }
+        .target-text { font-size: 24px; font-weight: 500; line-height: 1.4; color: var(--text-primary); }
         .target-translation { color: var(--text-secondary); font-size: 16px; margin-top: -16px; margin-bottom: 8px; }
         .play-btn {
             width: 64px;
             height: 64px;
             border-radius: 50%;
-            background: #eff6ff;
+            background: rgba(37, 99, 235, 0.1);
             color: var(--accent-primary);
             border: none;
             display: flex;
@@ -193,7 +193,7 @@ export default function ShadowingView({ data, onNext }) {
             justify-content: center;
             transition: all 0.2s;
         }
-        .play-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
+        .play-btn:active { transform: scale(0.95); background: rgba(37, 99, 235, 0.2); }
 
         .feedback-area {
             flex: 1;
@@ -215,7 +215,7 @@ export default function ShadowingView({ data, onNext }) {
             text-align: center;
         }
         .feedback-box.warning {
-            background: rgba(255, 71, 87, 0.1);
+            background: rgba(239, 68, 68, 0.1);
             border-color: var(--error);
         }
         
@@ -230,8 +230,8 @@ export default function ShadowingView({ data, onNext }) {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: #1e293b;
-            color: white;
+            background: var(--text-primary);
+            color: var(--bg-main);
             border: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
@@ -241,9 +241,9 @@ export default function ShadowingView({ data, onNext }) {
         }
 
         .next-btn {
-            background: #f8fafc;
+            background: var(--bg-card);
             color: var(--text-primary);
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(128,128,128,0.2);
             padding: 16px 32px;
             border-radius: 100px;
             display: flex;
@@ -253,7 +253,7 @@ export default function ShadowingView({ data, onNext }) {
             justify-content: center;
             font-weight: 700;
         }
-        .next-btn:active { background: rgba(255,255,255,0.05); }
+        .next-btn:active { background: rgba(128,128,128,0.1); }
 
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.4); }

@@ -93,6 +93,42 @@ export default function SettingsScreen({ onStart }) {
         </div>
       </div>
 
+      <div className="card">
+        <label className="section-label"><Settings size={18} /> 화면 테마 및 색상 설정</label>
+        <div className="toggle-group">
+          {['light', 'dark', 'custom'].map(m => (
+            <button
+              key={m}
+              className={`toggle-btn ${settings.themeMode === m ? 'active' : ''}`}
+              onClick={() => updateSettings('themeMode', m)}
+            >
+              {m === 'light' ? '밝게' : m === 'dark' ? '어둡게' : '커스텀'}
+            </button>
+          ))}
+        </div>
+
+        {settings.themeMode === 'custom' && (
+          <div className="custom-colors">
+            <div className="color-picker-item">
+              <label>배경 색상</label>
+              <input
+                type="color"
+                value={settings.customBgColor}
+                onChange={(e) => updateSettings('customBgColor', e.target.value)}
+              />
+            </div>
+            <div className="color-picker-item">
+              <label>글자 색상</label>
+              <input
+                type="color"
+                value={settings.customTextColor}
+                onChange={(e) => updateSettings('customTextColor', e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       <button className="primary-btn" onClick={onStart}>
         오늘의 학습 시작하기
       </button>
@@ -120,11 +156,12 @@ export default function SettingsScreen({ onStart }) {
         }
         .card {
           background: var(--bg-card);
-          padding: 20px;
+          padding: 24px;
           border-radius: var(--radius-md);
           display: flex;
           flex-direction: column;
           gap: 16px;
+          border: 1px solid rgba(128,128,128,0.1);
         }
         .setting-item {
           display: flex;
@@ -252,6 +289,28 @@ export default function SettingsScreen({ onStart }) {
         .voice-name {
             font-size: 14px;
             font-weight: 500;
+        }
+        .custom-colors {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .color-picker-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .color-picker-item label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .color-picker-item input {
+            width: 40px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+            background: none;
         }
       `}</style>
     </div>

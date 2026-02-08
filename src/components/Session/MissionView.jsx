@@ -68,10 +68,10 @@ export default function MissionView({ data, onNext }) {
         }
         .scenario-card {
             width: 100%;
-            background: #f8fafc;
+            background: var(--bg-card);
             padding: 24px;
             border-radius: var(--radius-lg);
-            border: 1px solid #e2e8f0;
+            border: 1px solid rgba(128,128,128,0.2);
         }
         .card-header {
             display: flex;
