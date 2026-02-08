@@ -369,5 +369,27 @@ export const OpenAIService = {
             console.error("Interpretation error:", error);
             return "Translation failed due to error.";
         }
+    },
+
+    // Real-time Q&A about expression
+    askAboutExpression: async (expression, question) => {
+        try {
+            const prompt = `The user is studying the English expression: "${expression}".
+            They have a follow-up question: "${question}".
+            Provide a very brief, helpful answer in Korean focusing on word choice, imagery, or usage.
+            Keep the answer under 2-3 sentences.`;
+
+            const completion = await callOpenAI(
+                [
+                    { role: "system", content: "You are an expert English tutor who explains word imagery and core meanings." },
+                    { role: "user", content: prompt }
+                ]
+            );
+
+            return completion.choices[0].message.content.trim();
+        } catch (error) {
+            console.error("AskAboutExpression error:", error);
+            return "죄송합니다. 답변을 가져오는 중 오류가 발생했습니다.";
+        }
     }
 };

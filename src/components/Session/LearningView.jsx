@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, HelpCircle, Volume2 } from 'lucide-react';
+import { BookOpen, HelpCircle, Volume2, MessageCircle, Send, Loader2 } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 import { OpenAIService } from '../../services/OpenAIService';
 import BlindText from '../UI/BlindText';
@@ -11,8 +11,11 @@ export default function LearningView({ data, onNext }) {
   const fontScale = settings.fontScales?.LearningView || 1.0;
   const [playingIndex, setPlayingIndex] = useState(null);
 
+  // Q&A State per expression: { index: { question: '', answer: '', isAsking: false } }
+  const [qaStates, setQaStates] = useState({});
+
   const playTwice = async (text, index) => {
-    if (playingIndex !== null) return; // Prevent overlapping playback
+    if (playingIndex !== null) return;
     setPlayingIndex(index);
 
     const voice = settings?.voice || 'shimmer';
@@ -21,7 +24,6 @@ export default function LearningView({ data, onNext }) {
     try {
       const audioUrl = await OpenAIService.speak(text, voice, speed);
       if (!audioUrl) {
-        // Fallback
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'en-US';
         u.volume = 1.0;
@@ -55,6 +57,38 @@ export default function LearningView({ data, onNext }) {
     }
   };
 
+  const handleQaChange = (index, value) => {
+    setQaStates(prev => ({
+      ...prev,
+      [index]: { ...prev[index], question: value }
+    }));
+  };
+
+  const submitQuestion = async (e, index, expression) => {
+    e.stopPropagation(); // Prevents audio playback
+    const question = qaStates[index]?.question;
+    if (!question || !question.trim()) return;
+
+    setQaStates(prev => ({
+      ...prev,
+      [index]: { ...prev[index], isAsking: true }
+    }));
+
+    try {
+      const answer = await OpenAIService.askAboutExpression(expression, question);
+      setQaStates(prev => ({
+        ...prev,
+        [index]: { ...prev[index], answer, isAsking: false }
+      }));
+    } catch (err) {
+      console.error(err);
+      setQaStates(prev => ({
+        ...prev,
+        [index]: { ...prev[index], isAsking: false }
+      }));
+    }
+  };
+
   return (
     <div className="learning-container" style={{ '--font-scale': fontScale }}>
       <div className="page-header-ctrl">
@@ -76,6 +110,27 @@ export default function LearningView({ data, onNext }) {
               <p>{exp.explanation}</p>
             </div>
             <BlindText text={exp.translation} />
+
+            <div className="qa-section" onClick={(e) => e.stopPropagation()}>
+              <div className="qa-input-row">
+                <input
+                  type="text"
+                  placeholder="표현에 대해 궁금한 점을 물어보세요..."
+                  value={qaStates[i]?.question || ''}
+                  onChange={(e) => handleQaChange(i, e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && submitQuestion(e, i, exp.text)}
+                />
+                <button className="qa-submit" onClick={(e) => submitQuestion(e, i, exp.text)} disabled={qaStates[i]?.isAsking}>
+                  {qaStates[i]?.isAsking ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
+                </button>
+              </div>
+              {qaStates[i]?.answer && (
+                <div className="qa-answer">
+                  <MessageCircle size={14} className="ai-icon" />
+                  <p>{qaStates[i].answer}</p>
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -99,48 +154,48 @@ export default function LearningView({ data, onNext }) {
           display: flex;
           flex-direction: column;
           gap: 20px;
+          background: var(--bg-main);
         }
         .page-header-ctrl { width: 100%; display: flex; justify-content: flex-end; margin-bottom: 8px; }
+        .section-header { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
         .section-header h2 {
           font-size: calc(18px * var(--font-scale));
           color: var(--text-primary);
-        }
-        .mission-text {
-            font-size: 20px;
-            font-weight: 500;
-            line-height: 1.4;
-            color: var(--text-primary);
-        }
-        .scenario-card {
-            width: 100%;
-            background: #f8fafc;
-            padding: 24px;
-            border-radius: var(--radius-lg);
-            border: 1px solid #e2e8f0;
+          font-weight: 700;
         }
         .card {
-          background: var(--bg-main);
-          padding: 24px;
+          background: var(--bg-card);
+          padding: 20px;
           border-radius: var(--radius-lg);
           display: flex;
           flex-direction: column;
-          gap: 16px;
-          border: 1px solid rgba(128,128,128,0.2);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          gap: 20px;
+          border: 1px solid rgba(128,128,128,0.1);
         }
+        .expression-item {
+            padding: 20px;
+            border-bottom: 1px solid rgba(128,128,128,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 12px;
+            background: var(--bg-main);
+        }
+        .expression-item:last-child { border-bottom: none; }
+        .expression-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .expression-item.playing { border-color: var(--accent-primary); background: rgba(37, 99, 235, 0.03); }
+        
         .expression-item h3 {
           color: var(--text-primary);
-          font-size: calc(18px * var(--font-scale));
-          font-weight: 600;
+          font-size: calc(19px * var(--font-scale));
+          font-weight: 700;
           margin-bottom: 12px;
-          letter-spacing: 0.5px;
         }
         .explanation-box {
           background: rgba(128, 128, 128, 0.05);
-          padding: 12px;
+          padding: 14px;
           border-radius: 8px;
           margin-bottom: 12px;
-          border-left: 3px solid var(--accent-primary);
+          border-left: 4px solid var(--accent-primary);
         }
         .explanation-box p {
           color: var(--text-secondary);
@@ -149,51 +204,77 @@ export default function LearningView({ data, onNext }) {
           margin: 0;
           white-space: pre-wrap;
         }
-        .question-card p { font-size: calc(16px * var(--font-scale)); }
-        /* Removed duplicate expression-item style */
-        .expression-item:last-child {
-            border-bottom: none;
-            padding-bottom: 12px;
+
+        .qa-section {
+          margin-top: 16px;
+          padding-top: 16px;
+          border-top: 1px dashed rgba(128,128,128,0.2);
         }
+        .qa-input-row {
+          display: flex;
+          gap: 8px;
+        }
+        .qa-input-row input {
+          flex: 1;
+          background: var(--bg-secondary);
+          border: 1px solid rgba(128,128,128,0.2);
+          border-radius: 8px;
+          padding: 10px 14px;
+          font-size: 13px;
+          color: var(--text-primary);
+          outline: none;
+        }
+        .qa-input-row input:focus { border-color: var(--accent-primary); }
+        .qa-submit {
+          background: var(--accent-primary);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          width: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: opacity 0.2s;
+        }
+        .qa-submit:disabled { opacity: 0.5; }
+        
+        .qa-answer {
+          margin-top: 12px;
+          background: rgba(37, 99, 235, 0.05);
+          padding: 12px;
+          border-radius: 8px;
+          display: flex;
+          gap: 10px;
+          align-items: flex-start;
+          animation: fadeIn 0.3s ease;
+        }
+        .ai-icon { color: var(--accent-primary); margin-top: 2px; }
+        .qa-answer p {
+          font-size: 13px;
+          line-height: 1.5;
+          color: var(--text-primary);
+          margin: 0;
+        }
+
+        .question-card p { font-size: calc(16px * var(--font-scale)); line-height: 1.6; }
         .question-card {
           border: 1px solid var(--accent-secondary);
-          background: rgba(118, 75, 162, 0.05);
+          background: rgba(118, 75, 162, 0.04);
         }
         .primary-btn {
           background: var(--accent-gradient);
           color: white;
-          padding: 16px;
+          padding: 18px;
           border-radius: var(--radius-md);
           font-weight: 700;
-          margin-top: auto;
-          box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
-          transition: transform 0.2s;
+          box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+          border: none;
+          font-size: 16px;
         }
-        .primary-btn:active {
-            transform: scale(0.98);
-        }
-        .expression-item {
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(128,128,128,0.1);
-            cursor: pointer;
-            transition: background 0.2s;
-            border-radius: 12px;
-            padding: 16px;
-        }
-        .expression-item:hover {
-            background: rgba(128,128,128,0.05);
-        }
-        .expression-item.playing {
-            background: rgba(37, 99, 235, 0.1);
-            border: 1px solid var(--accent-primary);
-        }
-        .pulsing-icon {
-            display: inline-block;
-            margin-right: 8px;
-            animation: pulse-scale 1s infinite;
-            vertical-align: middle;
-            color: var(--accent-primary);
-        }
+        .pulsing-icon { margin-right: 8px; animation: pulse-scale 1s infinite; color: var(--accent-primary); }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse-scale {
             0% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.2); opacity: 1; }
