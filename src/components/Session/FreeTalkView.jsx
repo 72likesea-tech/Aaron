@@ -19,13 +19,19 @@ export default function FreeTalkView({ data, onNext }) {
     const [isTranscribing, setIsTranscribing] = useState(false);
     const [errorMsg, setErrorMsg] = useState(null);
 
-    const chatEndRef = useRef(null);
-    const mediaRecorder = useRef(null);
-    const audioChunks = useRef([]);
-    const isSessionActiveRef = useRef(false);
+    const audioRef = useRef(null);
+    const voicesChangedListener = useRef(false);
 
     useEffect(() => {
         isSessionActiveRef.current = isSessionActive;
+        return () => {
+            // Cleanup audio and synthesis on unmount
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+            window.speechSynthesis.cancel();
+        };
     }, [isSessionActive]);
 
     useEffect(() => {
@@ -39,8 +45,15 @@ export default function FreeTalkView({ data, onNext }) {
     const startSession = () => {
         setErrorMsg(null);
         setIsSessionActive(true);
-        if (window.speechSynthesis.getVoices().length === 0) {
-            window.speechSynthesis.onvoiceschanged = () => playInitialGreeting();
+
+        // Prevent multiple initial greetings
+        if (window.speechSynthesis.getVoices().length === 0 && !voicesChangedListener.current) {
+            voicesChangedListener.current = true;
+            const handleVoices = () => {
+                playInitialGreeting();
+                window.speechSynthesis.removeEventListener('voiceschanged', handleVoices);
+            };
+            window.speechSynthesis.addEventListener('voiceschanged', handleVoices);
         } else {
             playInitialGreeting();
         }
@@ -62,10 +75,15 @@ export default function FreeTalkView({ data, onNext }) {
         if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
             mediaRecorder.current.stop();
         }
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+        }
         window.speechSynthesis.cancel();
     };
 
     const startRecording = async () => {
+        if (!isSessionActiveRef.current) return;
         try {
             setErrorMsg(null);
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -96,7 +114,6 @@ export default function FreeTalkView({ data, onNext }) {
         if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
             mediaRecorder.current.stop();
             setIsRecording(false);
-            // onstop will trigger processAudioMessage
         }
     };
 
@@ -107,7 +124,6 @@ export default function FreeTalkView({ data, onNext }) {
             if (text && text.trim()) {
                 await handleUserMessage(text);
             } else {
-                // If nothing was transcribed, just restart recording
                 if (isSessionActiveRef.current) startRecording();
             }
         } catch (err) {
@@ -140,18 +156,30 @@ export default function FreeTalkView({ data, onNext }) {
     };
 
     const speak = async (text) => {
+        // Stop any currently playing audio
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+        }
+        window.speechSynthesis.cancel();
+
         setIsSpeaking(true);
         try {
             const audioUrl = await OpenAIService.speak(text, currentVoice, settings.speed || 100);
             if (audioUrl) {
                 const audio = new Audio(audioUrl);
+                audioRef.current = audio;
                 audio.onended = () => {
                     setIsSpeaking(false);
+                    audioRef.current = null;
                     if (isSessionActiveRef.current) {
                         startRecording();
                     }
                 };
-                audio.play();
+                audio.play().catch(e => {
+                    console.error("Audio play failed:", e);
+                    fallbackSpeak(text);
+                });
             } else {
                 fallbackSpeak(text);
             }
@@ -162,6 +190,7 @@ export default function FreeTalkView({ data, onNext }) {
     };
 
     const fallbackSpeak = (text) => {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
         utterance.onend = () => {
