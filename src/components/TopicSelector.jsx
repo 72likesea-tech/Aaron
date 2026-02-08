@@ -146,14 +146,14 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
           font-weight: 700;
         }
         .topic-source {
-          font-size: 12px;
+          font-size: 16px;
           color: var(--success);
-          font-weight: 500;
-          margin-top: 2px;
+          font-weight: 600;
+          margin-top: 4px;
         }
         .topic-info h3 {
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 22px;
+          font-weight: 700;
           line-height: 1.4;
           color: var(--text-primary);
         }

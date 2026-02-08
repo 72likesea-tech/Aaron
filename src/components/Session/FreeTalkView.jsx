@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Volume2, Square, AlertCircle, Send, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Volume2, Square, AlertCircle, Send, Loader2, Languages } from 'lucide-react';
 import { OpenAIService } from '../../services/OpenAIService';
 import { useUser } from '../../context/UserContext';
+import BlindText from '../UI/BlindText';
 
 export default function FreeTalkView({ data, onNext }) {
     const { settings } = useUser();
@@ -10,7 +11,8 @@ export default function FreeTalkView({ data, onNext }) {
     const [messages, setMessages] = useState([
         {
             sender: 'ai',
-            text: data?.freeTalkIntro || "Let's start free talking! What do you think about the topic?"
+            text: data?.freeTalkIntro || "Let's start free talking! What do you think about the topic?",
+            translation: data?.freeTalkIntroTranslation || "우리 자유롭게 이야기해봐요! 이 주제에 대해 어떻게 생각하시나요?"
         }
     ]);
     const [isSessionActive, setIsSessionActive] = useState(false);
@@ -140,7 +142,13 @@ export default function FreeTalkView({ data, onNext }) {
     };
 
     const handleUserMessage = async (text) => {
-        const userMsg = { sender: 'user', text };
+        // For user messages, we might want a translation too
+        let userTranslation = "";
+        try {
+            userTranslation = await OpenAIService.interpret(text, "English", "Korean");
+        } catch (e) { console.error(e); }
+
+        const userMsg = { sender: 'user', text, translation: userTranslation };
         setMessages(prev => [...prev, userMsg]);
 
         const history = [...messages, userMsg].map(m => ({
@@ -149,10 +157,14 @@ export default function FreeTalkView({ data, onNext }) {
         }));
 
         try {
-            const aiResponseText = await OpenAIService.freeTalkChat(text, history);
-            const aiMsg = { sender: 'ai', text: aiResponseText };
+            const aiResponse = await OpenAIService.freeTalkChat(text, history);
+            const aiMsg = {
+                sender: 'ai',
+                text: aiResponse.english || aiResponse,
+                translation: aiResponse.korean || ""
+            };
             setMessages(prev => [...prev, aiMsg]);
-            speak(aiResponseText);
+            speak(aiMsg.text);
         } catch (err) {
             console.error("Chat error:", err);
             setErrorMsg("AI 응답을 가져오는 중 오류가 발생했습니다.");
@@ -228,8 +240,13 @@ export default function FreeTalkView({ data, onNext }) {
                 {messages.map((msg, i) => (
                     <div key={i} className={`message ${msg.sender}`}>
                         {msg.sender === 'ai' && <div className="avatar">AI</div>}
-                        <div className="bubble">
-                            {msg.text}
+                        <div className="bubble-container">
+                            <div className="bubble">
+                                {msg.text}
+                            </div>
+                            {msg.translation && (
+                                <BlindText text={msg.translation} className="chat-translation" />
+                            )}
                         </div>
                     </div>
                 ))}
@@ -366,11 +383,24 @@ export default function FreeTalkView({ data, onNext }) {
             border-bottom-right-radius: 4px;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
         }
+        .bubble-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+        }
+        .message.user .bubble-container {
+            align-items: flex-end;
+        }
         .bubble {
             padding: 12px 16px;
             border-radius: 18px;
             font-size: 16px;
             line-height: 1.6;
+            width: fit-content;
+        }
+        .chat-translation {
+            margin-top: 4px;
         }
         
         .recording-pulse {

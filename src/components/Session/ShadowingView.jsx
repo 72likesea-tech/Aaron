@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Mic, Play, ArrowRight, RotateCcw } from 'lucide-react';
 import { OpenAIService } from '../../services/OpenAIService';
 import { useUser } from '../../context/UserContext';
+import BlindText from '../UI/BlindText';
 
 export default function ShadowingView({ data, onNext }) {
   // Determine sentences: data.shadowingSentences (new format) or mapped keyExpressions (fallback)
@@ -120,7 +121,7 @@ export default function ShadowingView({ data, onNext }) {
       <div className="target-card">
         <h3 className="target-text">{currentSentence.text}</h3>
         {currentSentence.translation && (
-          <p className="target-translation">{currentSentence.translation}</p>
+          <BlindText text={currentSentence.translation} />
         )}
         <button className="play-btn" onClick={speakTarget}>
           <Play size={24} fill="currentColor" />
@@ -180,7 +181,7 @@ export default function ShadowingView({ data, onNext }) {
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
         .target-text { font-size: 24px; font-weight: 500; line-height: 1.4; color: var(--text-primary); }
-        .target-translation { color: var(--text-secondary); font-size: 16px; margin-top: -16px; margin-bottom: 8px; }
+        .target-translation { display: none; }
         .play-btn {
             width: 64px;
             height: 64px;

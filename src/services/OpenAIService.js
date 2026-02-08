@@ -169,15 +169,22 @@ export const OpenAIService = {
             openAIMessages.push({ role: 'user', content: message });
             openAIMessages.unshift({
                 role: "system",
-                content: "You are a friendly English conversation partner. Primarily respond in English. Only use Korean if the student asks a question in Korean or requests help/translation. Strictly ignore or do not detect any other languages except English and Korean."
+                content: "You are a friendly English conversation partner. Primarily respond in English. Return strictly a JSON object with: { \"english\": \"AI's response in English\", \"korean\": \"Korean translation of the response\" }. Strictly ignore or do not detect any other languages except English and Korean."
             });
 
             const completion = await callOpenAI(
                 openAIMessages,
-                150 // max_tokens
+                300 // increased max_tokens for JSON
             );
 
-            return completion.choices[0].message.content;
+            let text = completion.choices[0].message.content.trim();
+            text = text.replace(/```json/g, '').replace(/```/g, '');
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error("JSON parse error in freeTalkChat", text);
+                return { english: text, korean: "" }; // Fallback
+            }
         } catch (error) {
             console.error("OpenAI freeTalkChat error:", error);
             return "Good job! Let's continue.";
@@ -209,6 +216,7 @@ export const OpenAIService = {
             Each object must have:
             - original: string (The student's exact part of the sentence)
             - correction: string (The natural/corrected version)
+            - translation: string (Korean translation of the corrected version)
             - reason: string (Brief explanation in Korean about grammar or nuance)
             - pronunciationTip: string (Optional Korean tip on how to pronounce this better. e.g., "Note the 'th' sound in 'think'.")
 

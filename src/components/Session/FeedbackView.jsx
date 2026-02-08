@@ -1,4 +1,5 @@
 import { ArrowRight, CheckCircle, AlertTriangle } from 'lucide-react';
+import BlindText from '../UI/BlindText';
 
 export default function FeedbackView({ onNext, corrections }) {
   return (
@@ -30,6 +31,7 @@ export default function FeedbackView({ onNext, corrections }) {
                 <div className="good-box">
                   <span className="correction-label">더 자연스러운 권장 표현</span>
                   <span className="good-text">"{item.correction}"</span>
+                  {item.translation && <BlindText text={item.translation} className="feedback-translation" />}
                 </div>
 
                 <p className="reason">💡 {item.reason}</p>
