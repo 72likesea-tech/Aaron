@@ -3,6 +3,7 @@ import { Mic, MicOff, Volume2, Square, AlertCircle, Send, Loader2, Languages } f
 import { OpenAIService } from '../../services/OpenAIService';
 import { useUser } from '../../context/UserContext';
 import BlindText from '../UI/BlindText';
+import FontSizeController from '../UI/FontSizeController';
 
 export default function FreeTalkView({ data, onNext }) {
     const { settings } = useUser();
