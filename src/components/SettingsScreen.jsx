@@ -131,7 +131,7 @@ export default function SettingsScreen({ onStart }) {
       </div>
 
       <button className="primary-btn" onClick={onStart}>
-        저장하고 돌아가기
+        시~작
       </button>
 
       <style>{`

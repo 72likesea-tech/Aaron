@@ -90,7 +90,10 @@ export const OpenAIService = {
       - keyExpressions: array of ${sentenceCount} objects { 
           text: string (English sentence), 
           translation: string (Korean), 
-          explanation: string (Detailed Korean explanation: 1. Why this is more natural than a Korean literal translation 2. 'English Thinking': Explain why specific verbs/nouns were chosen from a native speaker's perspective 3. The subtle nuance/feeling this sends to the listener) 
+          explanation: string (Brief Korean explanation in 2 lines: 
+            Line 1: [영어식 사고] Explain the choice of verbs/words and how they differ from Korean-style expressions.
+            Line 2: [뉘앙스] Describe the subtle feeling/nuance.
+            Strictly separate these two lines.)
         }
       - shadowingSentences: array of 3 objects { text: string (English sentence), translation: string (Korean translation) }
       - tips: string (One sentence advice in English)
@@ -173,7 +176,7 @@ export const OpenAIService = {
             openAIMessages.push({ role: 'user', content: message });
             openAIMessages.unshift({
                 role: "system",
-                content: "You are a friendly English conversation partner. Primarily respond in English. Return strictly a JSON object with: { \"english\": \"AI's response in English\", \"korean\": \"Korean translation of the response\" }. Strictly ignore or do not detect any other languages except English and Korean."
+                content: "You are a friendly English conversation partner. Primarily respond in English. Return strictly a JSON object with: { \"english\": \"AI's response in English\", \"korean\": \"Korean translation of the response\" }. Strictly ignore or do not detect any other languages except English and Korean. CRITICAL: The length of your 'english' response MUST be similar to the length of the user's last message. If they speak briefly, reply briefly. If they speak at length, reply at length."
             });
 
             const completion = await callOpenAI(
