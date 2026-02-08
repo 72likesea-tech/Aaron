@@ -18,21 +18,23 @@ export default function FeedbackView({ onNext, corrections }) {
 
       {corrections && corrections.length > 0 && (
         <div className="corrections-section">
-          <h2><AlertTriangle size={20} /> AI 피드백</h2>
+          <h2><AlertTriangle size={20} /> 실력 향상을 위한 AI 피드백</h2>
           <div className="corrections-list">
             {corrections.map((item, i) => (
               <div key={i} className="correction-card">
-                <div className="bad">
-                  <span className="label">Original:</span>
-                  <span className="text">"{item.original}"</span>
+                <div className="bad-box">
+                  <span className="correction-label">상대방이 들은 나의 표현</span>
+                  <span className="bad-text">"{item.original}"</span>
                 </div>
-                <div className="good">
-                  <span className="label">Better:</span>
-                  <span className="text">"{item.correction}"</span>
+
+                <div className="good-box">
+                  <span className="correction-label">더 자연스러운 권장 표현</span>
+                  <span className="good-text">"{item.correction}"</span>
                 </div>
+
                 <p className="reason">💡 {item.reason}</p>
                 {item.pronunciationTip && (
-                  <p className="pronunciation-tip">🗣️ <strong>Pronunciation Tip:</strong> {item.pronunciationTip}</p>
+                  <p className="pronunciation-tip">🗣️ <strong>발음 팁:</strong> {item.pronunciationTip}</p>
                 )}
               </div>
             ))}
@@ -46,151 +48,165 @@ export default function FeedbackView({ onNext, corrections }) {
 
       <style>{`
         .feedback-container {
-          padding: 32px 24px;
+          padding: 40px 24px;
           display: flex;
           flex-direction: column;
           gap: 32px;
           height: 100vh;
           overflow-y: auto;
-          background: var(--bg-main);
+          background: #ffffff;
+          color: #1a1a1a;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        .header { text-align: center; }
+        .header { text-align: center; margin-bottom: 8px; }
         .header h1 { 
-          color: var(--accent-primary); 
-          margin-bottom: 12px; 
+          color: #1a1a1a;
+          margin-bottom: 8px; 
           font-size: 32px;
           font-weight: 800;
+          letter-spacing: -0.5px;
         }
         .header p { 
-          color: var(--text-secondary); 
+          color: #666666;
           font-size: 18px; 
-          font-weight: 500;
+          font-weight: 400;
         }
         
         .summary-card {
-            background: var(--bg-card);
+            background: #f8fafc;
             padding: 40px;
-            border-radius: var(--radius-lg);
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            gap: 16px;
+            border: 1px solid #e2e8f0;
         }
         .score-circle {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: var(--accent-gradient);
+            background: #2563eb;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
-            font-size: 24px;
-            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.5);
+            font-weight: 700;
+            font-size: 20px;
             color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
         .summary-card h3 {
-          font-size: 28px;
-          color: white;
+          font-size: 24px;
+          color: #1e293b;
+          margin: 0;
         }
         .summary-card p {
-          font-size: 18px;
-          color: var(--text-secondary);
+          font-size: 16px;
+          color: #64748b;
+          margin: 0;
         }
         
         .corrections-section h2 {
-            font-size: 24px;
+            font-size: 22px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            color: var(--accent-secondary);
+            gap: 10px;
+            margin-bottom: 24px;
+            color: #1e293b;
             font-weight: 700;
         }
         .corrections-list {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
         .correction-card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
             padding: 24px;
-            border-radius: var(--radius-lg);
-            transition: transform 0.2s;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
-        .correction-card:hover {
-          transform: translateY(-2px);
-          background: rgba(255,255,255,0.08);
-        }
-        .correction-card .bad {
-            color: #ff6b6b;
-            margin-bottom: 12px;
-            text-decoration: line-through;
-            opacity: 0.9;
-            font-size: 18px;
-            line-height: 1.5;
-        }
-        .correction-card .good {
-            color: #2ed573;
+        
+        .correction-label {
+            font-size: 13px;
             font-weight: 700;
-            margin-bottom: 12px;
-            font-size: 20px;
-            line-height: 1.5;
-        }
-        .correction-card .label {
-            margin-right: 12px;
-            font-size: 14px;
+            color: #94a3b8;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 800;
-            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
         }
-        .reason {
+
+        .bad-box {
+            background: #fff5f5;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid #feb2b2;
+        }
+        .correction-card .bad-text {
+            color: #c53030;
             font-size: 17px;
-            color: #ecf0f1;
+            line-height: 1.5;
+            display: block;
+        }
+
+        .good-box {
+            background: #f0f9ff;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid #2563eb;
+        }
+        .correction-card .good-text {
+            color: #2563eb;
+            font-weight: 700;
+            font-size: 19px;
+            line-height: 1.5;
+            display: block;
+        }
+
+        .reason {
+            font-size: 15px;
+            color: #475569;
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid #f1f5f9;
             line-height: 1.6;
         }
 
+        .pronunciation-tip {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+        .pronunciation-tip strong {
+          color: #1e293b;
+        }
+
         .primary-btn {
-            background: var(--accent-primary);
+            background: #1a1a1a;
             color: white;
-            padding: 20px;
-            border-radius: var(--radius-md);
+            padding: 18px;
+            border-radius: 16px;
             font-weight: 700;
-            font-size: 20px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            margin-top: 32px;
+            margin-top: 40px;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
             transition: all 0.2s;
         }
         .primary-btn:active {
           transform: scale(0.98);
-        }
-        
-        .pronunciation-tip {
-            margin-top: 12px;
-            padding: 12px;
-            background: rgba(118, 75, 162, 0.1);
-            border-radius: 8px;
-            border-left: 4px solid var(--accent-primary);
-            font-size: 17px;
-            color: #d1d8e0;
-            line-height: 1.6;
-        }
-        .pronunciation-tip strong {
-          color: var(--accent-primary);
+          background: #333333;
         }
       `}</style>
     </div>
