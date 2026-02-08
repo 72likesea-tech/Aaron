@@ -91,7 +91,7 @@ export const OpenAIService = {
           text: string (English sentence), 
           translation: string (Korean), 
           explanation: string (Brief Korean explanation in 2 lines: 
-            Line 1: [영어식 사고] Focus on why specific English verbs/words are used instead of Korean-style literal translations. Explain the difference in thinking.
+            Line 1: [영어식 사고] Focus on 'why' these specific words/verbs are used based on their 'core meaning' (기본 내포 의미/이미지). Explain the logic behind the choice.
             Line 2: [뉘앙스] Describe the subtle feeling/nuance concisely.
             Strictly separate these two lines.)
         }
@@ -176,7 +176,7 @@ export const OpenAIService = {
             openAIMessages.push({ role: 'user', content: message });
             openAIMessages.unshift({
                 role: "system",
-                content: "You are a friendly English conversation partner. Primarily respond in English. Return strictly a JSON object with: { \"english\": \"AI's response in English\", \"korean\": \"Korean translation of the response\" }. Strictly ignore or do not detect any other languages except English and Korean. CRITICAL: The length of your 'english' response MUST be similar to the length of the user's last message. If they speak briefly, reply briefly. If they speak at length, reply at length."
+                content: "You are a friendly English conversation partner. Primarily respond in English. Return strictly a JSON object with: { \"english\": \"AI's response in English\", \"korean\": \"Korean translation of the response\" }. Strictly ignore or do not detect any other languages except English and Korean. CRITICAL: Your 'english' response length MUST strictly match the length of the user's last message. If they speak very briefly (e.g., 5 words), you MUST reply with a similar length. If they speak at length, you respond at length. Do not overwhelm a brief user with long responses."
             });
 
             const completion = await callOpenAI(
