@@ -90,7 +90,7 @@ export const OpenAIService = {
       - keyExpressions: array of ${sentenceCount} objects { 
           text: string (English sentence), 
           translation: string (Korean), 
-          explanation: string (문장에 사용된 주요 동사와 형용사를 중심으로 그 단어의 근본적 의미와 이미지를 간략히 설명하는 한글 설명. 한국식 표현과 차이가 있다면 그 점을 간단히 포함하여 간결하게 작성할 것.)
+          explanation: string (핵심 동사와 형용사의 근본적 의미/이미지만 한 문장 내외로 매우 짧게 설명. 부가 설명이나 상황 묘사는 모두 생략하고 결론만 전달할 것.)
         }
       - shadowingSentences: array of 3 objects { text: string (English sentence), translation: string (Korean translation) }
       - tips: string (One sentence advice in English)
