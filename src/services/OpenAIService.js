@@ -87,7 +87,11 @@ export const OpenAIService = {
       - missionTranslation: string (Korean translation of the mission)
       - scenario: string (Situation description in English)
       - scenarioTranslation: string (Korean translation of the scenario)
-      - keyExpressions: array of ${sentenceCount} objects { text: string (English sentence), translation: string (Korean), explanation: string (Korean nuance) }
+      - keyExpressions: array of ${sentenceCount} objects { 
+          text: string (English sentence), 
+          translation: string (Korean), 
+          explanation: string (Detailed Korean explanation: 1. Why this is more natural than a Korean literal translation 2. 'English Thinking': Explain why specific verbs/nouns were chosen from a native speaker's perspective 3. The subtle nuance/feeling this sends to the listener) 
+        }
       - shadowingSentences: array of 3 objects { text: string (English sentence), translation: string (Korean translation) }
       - tips: string (One sentence advice in English)
       - freeTalkIntro: string (An engaging opening question for the free talk session in English, related to the topic)

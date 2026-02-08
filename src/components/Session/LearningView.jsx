@@ -68,8 +68,10 @@ export default function LearningView({ data, onNext }) {
               {playingIndex === i && <Volume2 size={16} className="pulsing-icon" />}
               "{exp.text}"
             </h3>
-            <p>{exp.explanation}</p>
-            <BlindText text={`(${exp.translation})`} />
+            <div className="explanation-box">
+              <p>{exp.explanation}</p>
+            </div>
+            <BlindText text={exp.translation} />
           </div>
         ))}
       </div>
@@ -123,16 +125,25 @@ export default function LearningView({ data, onNext }) {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         .expression-item h3 {
-          color: var(--text-primary); /* Dark text for English text */
+          color: var(--text-primary);
           font-size: calc(18px * var(--font-scale));
           font-weight: 600;
-          margin-bottom: 8px;
+          margin-bottom: 12px;
           letter-spacing: 0.5px;
         }
-        .expression-item p {
+        .explanation-box {
+          background: rgba(128, 128, 128, 0.05);
+          padding: 12px;
+          border-radius: 8px;
+          margin-bottom: 12px;
+          border-left: 3px solid var(--accent-primary);
+        }
+        .explanation-box p {
           color: var(--text-secondary);
-          font-size: calc(15px * var(--font-scale));
-          line-height: 1.5;
+          font-size: calc(14px * var(--font-scale));
+          line-height: 1.6;
+          margin: 0;
+          white-space: pre-wrap;
         }
         .question-card p { font-size: calc(16px * var(--font-scale)); }
         /* Removed duplicate expression-item style */
