@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { BookOpen, HelpCircle, Volume2, MessageCircle, Send, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { BookOpen, HelpCircle, Volume2, MessageCircle, Send, Loader2, Mic } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 import { OpenAIService } from '../../services/OpenAIService';
 import BlindText from '../UI/BlindText';
@@ -11,8 +11,12 @@ export default function LearningView({ data, onNext }) {
   const fontScale = settings.fontScales?.LearningView || 1.0;
   const [playingIndex, setPlayingIndex] = useState(null);
 
-  // Q&A State per expression: { index: { question: '', answer: '', isAsking: false } }
+  // Q&A State per expression: { index: { question: '', answer: '', isAsking: false, isRecording: false } }
   const [qaStates, setQaStates] = useState({});
+
+  // Mic/Recording Refs
+  const mediaRecorder = useRef(null);
+  const audioChunks = useRef([]);
 
   const playTwice = async (text, index) => {
     if (playingIndex !== null) return;
@@ -64,14 +68,14 @@ export default function LearningView({ data, onNext }) {
     }));
   };
 
-  const submitQuestion = async (e, index, expression) => {
-    e.stopPropagation(); // Prevents audio playback
-    const question = qaStates[index]?.question;
+  const submitQuestion = async (e, index, expression, explicitText = null) => {
+    if (e) e.stopPropagation();
+    const question = explicitText || qaStates[index]?.question;
     if (!question || !question.trim()) return;
 
     setQaStates(prev => ({
       ...prev,
-      [index]: { ...prev[index], isAsking: true }
+      [index]: { ...prev[index], isAsking: true, question: question }
     }));
 
     try {
@@ -86,6 +90,71 @@ export default function LearningView({ data, onNext }) {
         ...prev,
         [index]: { ...prev[index], isAsking: false }
       }));
+    }
+  };
+
+  // Voice Q&A Implementation
+  const startVoiceQuestion = async (index, expression) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder.current = new MediaRecorder(stream);
+      audioChunks.current = [];
+
+      setQaStates(prev => ({
+        ...prev,
+        [index]: { ...prev[index], isRecording: true, question: '말씀해 주세요...' }
+      }));
+
+      mediaRecorder.current.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunks.current.push(event.data);
+      };
+
+      mediaRecorder.current.onstop = async () => {
+        setQaStates(prev => ({
+          ...prev,
+          [index]: { ...prev[index], isRecording: false, isAsking: true, question: '인식 중...' }
+        }));
+
+        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        try {
+          const transcribedText = await OpenAIService.transcribeAudio(audioBlob);
+          if (transcribedText.trim()) {
+            await submitQuestion(null, index, expression, transcribedText);
+          } else {
+            setQaStates(prev => ({
+              ...prev,
+              [index]: { ...prev[index], isAsking: false, question: '' }
+            }));
+          }
+        } catch (err) {
+          console.error("Transcribe error", err);
+          setQaStates(prev => ({
+            ...prev,
+            [index]: { ...prev[index], isAsking: false, question: '' }
+          }));
+        }
+      };
+
+      mediaRecorder.current.start();
+    } catch (err) {
+      console.error("Mic access error", err);
+      alert("마이크 접근 권한이 필요합니다.");
+    }
+  };
+
+  const stopVoiceQuestion = () => {
+    if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
+      mediaRecorder.current.stop();
+      mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  const toggleMic = (e, index, expression) => {
+    e.stopPropagation();
+    if (qaStates[index]?.isRecording) {
+      stopVoiceQuestion();
+    } else {
+      startVoiceQuestion(index, expression);
     }
   };
 
@@ -115,12 +184,24 @@ export default function LearningView({ data, onNext }) {
               <div className="qa-input-row">
                 <input
                   type="text"
-                  placeholder="표현에 대해 궁금한 점을 물어보세요..."
+                  placeholder="표현에 대해 물어보세요..."
                   value={qaStates[i]?.question || ''}
                   onChange={(e) => handleQaChange(i, e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && submitQuestion(e, i, exp.text)}
+                  disabled={qaStates[i]?.isAsking || qaStates[i]?.isRecording}
                 />
-                <button className="qa-submit" onClick={(e) => submitQuestion(e, i, exp.text)} disabled={qaStates[i]?.isAsking}>
+                <button
+                  className={`qa-mic-btn ${qaStates[i]?.isRecording ? 'recording' : ''}`}
+                  onClick={(e) => toggleMic(e, i, exp.text)}
+                  disabled={qaStates[i]?.isAsking}
+                >
+                  <Mic size={18} />
+                </button>
+                <button
+                  className="qa-submit"
+                  onClick={(e) => submitQuestion(e, i, exp.text)}
+                  disabled={qaStates[i]?.isAsking || qaStates[i]?.isRecording}
+                >
                   {qaStates[i]?.isAsking ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
                 </button>
               </div>
@@ -144,7 +225,7 @@ export default function LearningView({ data, onNext }) {
         <p>{tips || "Speak clearly and confidently!"}</p>
       </div>
 
-      <button className="primary-btn" onClick={onNext}>
+      <button className="primary-btn" onClick={onNext} disabled={Object.values(qaStates).some(s => s.isRecording || s.isAsking)}>
         다음 단계 (쉐도잉)
       </button>
 
@@ -224,7 +305,24 @@ export default function LearningView({ data, onNext }) {
           color: var(--text-primary);
           outline: none;
         }
-        .qa-input-row input:focus { border-color: var(--accent-primary); }
+        .qa-input-row input:disabled { opacity: 0.7; cursor: not-allowed; }
+        .qa-mic-btn {
+          background: var(--bg-secondary);
+          color: var(--text-secondary);
+          border: 1px solid rgba(128,128,128,0.2);
+          border-radius: 8px;
+          width: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+        .qa-mic-btn.recording {
+          background: var(--error);
+          color: white;
+          border-color: var(--error);
+          animation: pulse-red 1.5s infinite;
+        }
         .qa-submit {
           background: var(--accent-primary);
           color: white;
@@ -256,6 +354,12 @@ export default function LearningView({ data, onNext }) {
           margin: 0;
         }
 
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
         .question-card p { font-size: calc(16px * var(--font-scale)); line-height: 1.6; }
         .question-card {
           border: 1px solid var(--accent-secondary);
@@ -271,6 +375,7 @@ export default function LearningView({ data, onNext }) {
           border: none;
           font-size: 16px;
         }
+        .primary-btn:disabled { opacity: 0.5; pointer-events: none; }
         .pulsing-icon { margin-right: 8px; animation: pulse-scale 1s infinite; color: var(--accent-primary); }
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
