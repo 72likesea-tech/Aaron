@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mic, Play, ArrowRight, RotateCcw } from 'lucide-react';
+import { Mic, Play, ArrowRight, RotateCcw, Loader2 } from 'lucide-react';
 import { OpenAIService } from '../../services/OpenAIService';
 import { useUser } from '../../context/UserContext';
 import BlindText from '../UI/BlindText';
@@ -21,10 +21,12 @@ export default function ShadowingView({ data, onNext }) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isListening, setIsListening] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [feedback, setFeedback] = useState(null); // { isCorrect, feedback }
   const [transcript, setTranscript] = useState('');
 
-  const recognition = useRef(null);
+  const mediaRecorder = useRef(null);
+  const audioChunks = useRef([]);
   const { settings } = useUser();
   const currentVoice = settings?.voice || 'shimmer';
   const currentSpeed = settings?.speed || 100;
@@ -38,28 +40,70 @@ export default function ShadowingView({ data, onNext }) {
     setFeedback(result);
   };
 
-  const toggleRecording = () => {
-    if (isListening) {
-      recognition.current?.stop();
-    } else {
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder.current = new MediaRecorder(stream);
+      audioChunks.current = [];
+
+      mediaRecorder.current.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunks.current.push(event.data);
+      };
+
+      mediaRecorder.current.onstop = async () => {
+        setIsProcessing(true);
+        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        try {
+          const text = await OpenAIService.transcribeAudio(audioBlob);
+          setTranscript(text);
+          if (text) {
+            await assessSpeech(text);
+          }
+        } catch (err) {
+          console.error("Transcription error:", err);
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      mediaRecorder.current.start();
+      setIsListening(true);
       setFeedback(null);
       setTranscript('');
-      recognition.current?.start();
-      setIsListening(true);
+    } catch (err) {
+      console.error("Mic access denied:", err);
+      alert("마이크 접근 권한이 필요합니다.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder.current && mediaRecorder.current.state === 'recording') {
+      mediaRecorder.current.stop();
+      setIsListening(false);
+      // Stop all tracks to release mic
+      mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isListening) {
+      stopRecording();
+    } else {
+      startRecording();
     }
   };
 
   const speakTarget = async () => {
     const text = currentSentence.text;
-    // Use OpenAI TTS instead of browser
     const audioUrl = await OpenAIService.speak(text, currentVoice, currentSpeed);
     if (audioUrl) {
       const audio = new Audio(audioUrl);
+      audio.volume = 1.0; // Maximize volume
       audio.play();
     } else {
-      // Fallback
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
+      utterance.volume = 1.0;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -70,47 +114,9 @@ export default function ShadowingView({ data, onNext }) {
       setFeedback(null);
       setTranscript('');
     } else {
-      onNext(); // Go to Free Talk
+      onNext();
     }
   };
-
-
-
-  useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition.current = new SpeechRecognition();
-      recognition.current.continuous = false;
-      recognition.current.lang = 'en-US';
-      recognition.current.interimResults = true;
-      // Handlers attached dynamically or refs used?
-    }
-    return () => {
-      recognition.current?.stop();
-    }
-  }, []);
-
-  // Use refs for callbacks
-  const transcriptRef = useRef('');
-  useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
-
-  useEffect(() => {
-    if (!recognition.current) return;
-
-    recognition.current.onresult = (event) => {
-      const current = event.resultIndex;
-      const t = event.results[current][0].transcript;
-      setTranscript(t);
-    };
-
-    recognition.current.onend = () => {
-      setIsListening(false);
-      if (transcriptRef.current.trim()) {
-        assessSpeech(transcriptRef.current);
-      }
-    };
-  }, [assessSpeech]); // assessSpeech depends on currentSentence, so it changes.
-
 
   const fontScale = settings.fontScales?.ShadowingView || 1.0;
 
@@ -135,9 +141,15 @@ export default function ShadowingView({ data, onNext }) {
       </div>
 
       <div className="feedback-area">
-        {transcript && <p className="user-transcript">" {transcript} "</p>}
+        {isProcessing && (
+          <div className="processing-state">
+            <Loader2 className="spin" size={24} />
+            <span>발음 분석 중...</span>
+          </div>
+        )}
+        {!isProcessing && transcript && <p className="user-transcript">" {transcript} "</p>}
 
-        {feedback && (
+        {!isProcessing && feedback && (
           <div className={`feedback-box ${feedback.isCorrect ? 'success' : 'warning'}`}>
             <strong>{feedback.isCorrect ? "Perfect! 🎉" : "Try again! 💪"}</strong>
             <p>{feedback.feedback}</p>
@@ -149,13 +161,14 @@ export default function ShadowingView({ data, onNext }) {
         <button
           className={`record-btn ${isListening ? 'listening' : ''}`}
           onClick={toggleRecording}
+          disabled={isProcessing}
         >
           <Mic size={32} />
         </button>
-        <p>{isListening ? "Listening..." : "Tap to Speak"}</p>
+        <p>{isListening ? "Listening... (Tap to stop)" : isProcessing ? "Analyzing..." : "Tap to Speak"}</p>
       </div>
 
-      <button className="next-btn" onClick={handleNextSentence}>
+      <button className="next-btn" onClick={handleNextSentence} disabled={isListening || isProcessing}>
         {currentIndex < sentences.length - 1 ? "Next Sentence" : "Start Free Talk"} <ArrowRight size={20} />
       </button>
 
@@ -165,6 +178,7 @@ export default function ShadowingView({ data, onNext }) {
             flex-direction: column;
             height: 100%;
             padding: 24px;
+        }
         .page-header-ctrl { width: 100%; display: flex; justify-content: flex-end; }
         .step-header { text-align: center; }
         .step-header h2 { color: var(--accent-primary); margin-bottom: 8px; font-size: calc(24px * var(--font-scale)); }
@@ -185,7 +199,6 @@ export default function ShadowingView({ data, onNext }) {
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
         .target-text { font-size: calc(24px * var(--font-scale)); font-weight: 500; line-height: 1.4; color: var(--text-primary); }
-        .target-translation { display: none; }
         .play-btn {
             width: 64px;
             height: 64px;
@@ -208,9 +221,16 @@ export default function ShadowingView({ data, onNext }) {
             align-items: center;
             justify-content: center;
             gap: 16px;
-            min-height: 100px;
+            min-height: 120px;
         }
-        .user-transcript { color: var(--text-secondary); font-style: italic; }
+        .processing-state {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        .user-transcript { color: var(--text-secondary); font-style: italic; font-size: 14px; text-align: center; }
         .feedback-box {
             background: rgba(46, 213, 115, 0.1);
             border: 1px solid var(--success);
@@ -239,11 +259,19 @@ export default function ShadowingView({ data, onNext }) {
             color: var(--bg-main);
             border: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
+        .record-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .record-btn.listening {
             background: var(--error);
             animation: pulse-red 1.5s infinite;
         }
+        
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         .next-btn {
             background: var(--bg-card);
@@ -258,6 +286,7 @@ export default function ShadowingView({ data, onNext }) {
             justify-content: center;
             font-weight: 700;
         }
+        .next-btn:disabled { opacity: 0.5; }
         .next-btn:active { background: rgba(128,128,128,0.1); }
 
         @keyframes pulse-red {

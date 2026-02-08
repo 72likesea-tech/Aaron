@@ -91,8 +91,8 @@ export const OpenAIService = {
           text: string (English sentence), 
           translation: string (Korean), 
           explanation: string (Brief Korean explanation in 2 lines: 
-            Line 1: [영어식 사고] Explain the choice of verbs/words and how they differ from Korean-style expressions.
-            Line 2: [뉘앙스] Describe the subtle feeling/nuance.
+            Line 1: [영어식 사고] Focus on why specific English verbs/words are used instead of Korean-style literal translations. Explain the difference in thinking.
+            Line 2: [뉘앙스] Describe the subtle feeling/nuance concisely.
             Strictly separate these two lines.)
         }
       - shadowingSentences: array of 3 objects { text: string (English sentence), translation: string (Korean translation) }

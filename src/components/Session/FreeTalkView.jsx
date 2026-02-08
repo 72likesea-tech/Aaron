@@ -186,6 +186,7 @@ export default function FreeTalkView({ data, onNext }) {
             const audioUrl = await OpenAIService.speak(text, currentVoice, settings.speed || 100);
             if (audioUrl) {
                 const audio = new Audio(audioUrl);
+                audio.volume = 1.0;
                 audioRef.current = audio;
                 audio.onended = () => {
                     setIsSpeaking(false);
@@ -211,6 +212,7 @@ export default function FreeTalkView({ data, onNext }) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
+        utterance.volume = 1.0;
         utterance.onend = () => {
             setIsSpeaking(false);
             if (isSessionActiveRef.current) {

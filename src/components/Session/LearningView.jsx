@@ -24,10 +24,12 @@ export default function LearningView({ data, onNext }) {
         // Fallback
         const u = new SpeechSynthesisUtterance(text);
         u.lang = 'en-US';
+        u.volume = 1.0;
         u.onend = () => {
           setTimeout(() => {
             const u2 = new SpeechSynthesisUtterance(text);
             u2.lang = 'en-US';
+            u2.volume = 1.0;
             u2.onend = () => setPlayingIndex(null);
             window.speechSynthesis.speak(u2);
           }, 500);
@@ -37,9 +39,11 @@ export default function LearningView({ data, onNext }) {
       }
 
       const audio = new Audio(audioUrl);
+      audio.volume = 1.0;
       audio.onended = () => {
         setTimeout(() => {
           const audio2 = new Audio(audioUrl);
+          audio2.volume = 1.0;
           audio2.onended = () => setPlayingIndex(null);
           audio2.play();
         }, 500);
