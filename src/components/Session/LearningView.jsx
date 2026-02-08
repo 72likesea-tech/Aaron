@@ -328,7 +328,7 @@ export default function LearningView({ data, onNext }) {
         }
         .ai-icon { color: var(--accent-primary); margin-top: 2px; }
         .qa-answer p {
-          font-size: calc(16px * var(--font-scale));
+          font-size: calc(18px * var(--font-scale));
           line-height: 1.5;
           color: var(--text-primary);
           margin: 0;
