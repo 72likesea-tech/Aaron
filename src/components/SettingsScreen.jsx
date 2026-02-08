@@ -157,23 +157,25 @@ export default function SettingsScreen({ onStart }) {
         .toggle-group {
           display: flex;
           gap: 8px;
-          background: rgba(0,0,0,0.2);
-          padding: 4px;
+          background: #f1f5f9;
+          padding: 6px;
           border-radius: var(--radius-sm);
         }
         .toggle-btn {
           flex: 1;
-          padding: 8px 4px;
-          font-size: 12px;
+          padding: 10px 4px;
+          font-size: 13px;
           background: transparent;
           color: var(--text-secondary);
-          border-radius: 4px;
+          border-radius: 6px;
           transition: all 0.2s;
+          font-weight: 500;
         }
         .toggle-btn.active {
-          background: var(--bg-secondary);
-          color: white;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          background: #ffffff;
+          color: var(--accent-primary);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+          font-weight: 700;
         }
 
         .primary-btn {
@@ -192,19 +194,20 @@ export default function SettingsScreen({ onStart }) {
           gap: 12px;
         }
         .icon-btn {
-          width: 32px;
-          height: 32px;
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
-          background: rgba(255,255,255,0.1);
-          color: white;
+          background: #f1f5f9;
+          color: var(--text-primary);
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 700;
-          font-size: 18px;
+          font-size: 20px;
         }
         .icon-btn:active {
           background: var(--accent-primary);
+          color: white;
         }
         
         .voice-grid {
@@ -213,8 +216,8 @@ export default function SettingsScreen({ onStart }) {
             gap: 12px;
         }
         .voice-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid transparent;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 12px;
             display: flex;
@@ -225,9 +228,10 @@ export default function SettingsScreen({ onStart }) {
             transition: all 0.2s;
         }
         .voice-btn.active {
-            background: rgba(118, 75, 162, 0.1);
+            background: #eff6ff;
             border-color: var(--accent-primary);
-            color: white;
+            color: var(--accent-primary);
+            font-weight: 600;
         }
         .voice-icon {
             width: 32px;

@@ -166,25 +166,26 @@ export default function ShadowingView({ data, onNext }) {
         .step-header p { color: var(--text-secondary); font-size: 14px; }
 
         .target-card {
-            background: var(--bg-card);
+            background: #ffffff;
             padding: 32px;
             border-radius: var(--radius-lg);
             width: 100%;
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 24px;
             margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
         .target-text { font-size: 24px; font-weight: 500; line-height: 1.4; }
         .target-translation { color: var(--text-secondary); font-size: 16px; margin-top: -16px; margin-bottom: 8px; }
         .play-btn {
-            width: 56px;
-            height: 56px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.1);
+            background: #eff6ff;
             color: var(--accent-primary);
             border: none;
             display: flex;
@@ -229,10 +230,10 @@ export default function ShadowingView({ data, onNext }) {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: var(--accent-secondary);
+            background: #1e293b;
             color: white;
             border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
         .record-btn.listening {
             background: var(--error);
@@ -240,9 +241,9 @@ export default function ShadowingView({ data, onNext }) {
         }
 
         .next-btn {
-            background: transparent;
+            background: #f8fafc;
             color: var(--text-primary);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid #e2e8f0;
             padding: 16px 32px;
             border-radius: 100px;
             display: flex;
@@ -250,7 +251,7 @@ export default function ShadowingView({ data, onNext }) {
             gap: 8px;
             width: 100%;
             justify-content: center;
-            font-weight: 600;
+            font-weight: 700;
         }
         .next-btn:active { background: rgba(255,255,255,0.05); }
 

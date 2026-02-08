@@ -62,16 +62,16 @@ export default function MissionView({ data, onNext }) {
         }
         .mission-text {
             font-size: 20px;
-            font-weight: 300;
+            font-weight: 500;
             line-height: 1.4;
-            color: white;
+            color: var(--text-primary);
         }
         .scenario-card {
             width: 100%;
-            background: var(--bg-card);
+            background: #f8fafc;
             padding: 24px;
             border-radius: var(--radius-lg);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid #e2e8f0;
         }
         .card-header {
             display: flex;

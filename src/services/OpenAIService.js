@@ -167,7 +167,10 @@ export const OpenAIService = {
             }));
 
             openAIMessages.push({ role: 'user', content: message });
-            openAIMessages.unshift({ role: "system", content: "You are a friendly English conversation partner. Keep responses concise and engaging." });
+            openAIMessages.unshift({
+                role: "system",
+                content: "You are a friendly English conversation partner. Primarily respond in English. Only use Korean if the student asks a question in Korean or requests help/translation. Strictly ignore or do not detect any other languages except English and Korean."
+            });
 
             const completion = await callOpenAI(
                 openAIMessages,

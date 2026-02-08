@@ -1,15 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-primary: #0f0c29;
-  --bg-secondary: #1a1a2e;
-  --bg-card: #24243e;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0b0;
-  --accent-primary: #764ba2;
-  --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --success: #00b09b;
-  --error: #ff416c;
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-main: #ffffff;
+  --bg-card: #f8fafc;
+  --text-primary: #1a1a1a;
+  --text-secondary: #64748b;
+  --accent-primary: #2563eb;
+  --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  --success: #10b981;
+  --error: #ef4444;
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
@@ -22,7 +23,7 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
@@ -47,5 +48,5 @@ input, select, textarea {
   max-width: 480px; /* Mobile first constraint */
   margin: 0 auto;
   background-color: var(--bg-secondary);
-  box-shadow: 0 0 50px rgba(0,0,0,0.5);
+  box-shadow: 0 0 30px rgba(0,0,0,0.05); /* Softer shadow for light theme */
 }

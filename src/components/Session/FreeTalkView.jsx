@@ -309,61 +309,82 @@ export default function FreeTalkView({ data, onNext }) {
           display: flex;
           flex-direction: column;
           height: 100%;
-          background: var(--bg-main);
+          background: #ffffff;
         }
         .chat-header {
-            padding: 16px;
-            background: rgba(0,0,0,0.2);
+            padding: 20px 16px;
+            background: #ffffff;
+            border-bottom: 1px solid #f1f5f9;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .chat-header h2 { font-size: 16px; color: var(--accent-primary); }
-        .live { color: var(--success); font-weight: 700; font-size: 12px; }
-        .paused { color: var(--text-secondary); font-size: 12px; }
+        .chat-header h2 { font-size: 18px; color: #1e293b; font-weight: 700; }
+        .live { color: #10b981; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 4px; }
+        .paused { color: #94a3b8; font-size: 13px; font-weight: 500; }
         
         .chat-window {
             flex: 1;
             overflow-y: auto;
-            padding: 16px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            background: #f8fafc;
         }
         .message {
             display: flex;
-            gap: 8px;
-            max-width: 80%;
+            gap: 12px;
+            max-width: 85%;
         }
         .message.ai { align-self: flex-start; }
         .message.user { align-self: flex-end; flex-direction: row-reverse; }
+        
+        .avatar {
+          width: 32px;
+          height: 32px;
+          background: #e2e8f0;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 700;
+          color: #64748b;
+        }
+
         .message.ai .bubble {
-            background: var(--bg-card);
+            background: #ffffff;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
             border-top-left-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
         .message.user .bubble {
-            background: var(--accent-primary);
-            color: white;
+            background: #2563eb;
+            color: #ffffff;
             border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
         }
         .bubble {
             padding: 12px 16px;
-            border-radius: 16px;
-            font-size: 15px;
-            line-height: 1.5;
+            border-radius: 18px;
+            font-size: 16px;
+            line-height: 1.6;
         }
         
         .recording-pulse {
             display: flex;
             align-items: center;
             gap: 8px;
-            opacity: 0.8;
-            font-style: italic;
+            color: #64748b;
+            font-size: 14px;
+            background: transparent;
         }
         .recording-dot {
-            width: 8px;
-            height: 8px;
-            background: #ff4757;
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
             border-radius: 50%;
             animation: blink 1s infinite;
         }
@@ -372,25 +393,27 @@ export default function FreeTalkView({ data, onNext }) {
             display: flex;
             align-items: center;
             gap: 8px;
-            opacity: 0.7;
+            color: #64748b;
+            font-size: 14px;
         }
         
         .error-message {
-            background: rgba(255, 71, 87, 0.1);
-            color: var(--error);
+            background: #fef2f2;
+            color: #b91c1c;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 14px;
             display: flex;
             align-items: center;
             gap: 8px;
             justify-content: center;
+            border: 1px solid #fee2e2;
         }
 
         .controls-area {
-            padding: 24px;
-            background: var(--bg-card);
-            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 32px 24px;
+            background: #ffffff;
+            border-top: 1px solid #f1f5f9;
             display: flex;
             justify-content: center;
         }
@@ -409,28 +432,27 @@ export default function FreeTalkView({ data, onNext }) {
             gap: 8px;
             font-size: 16px;
             font-weight: 600;
-            color: var(--text-secondary);
         }
-        .status-text.listening { color: var(--success); }
-        .status-text.speaking { color: var(--accent-primary); }
-        .status-text.transcribing { color: #f1c40f; }
+        .status-text.listening { color: #10b981; }
+        .status-text.speaking { color: #2563eb; }
+        .status-text.transcribing { color: #f59e0b; }
 
         .large-done-btn {
             width: 100%;
             max-width: 320px;
-            background: var(--accent-primary);
-            color: white;
+            background: #1e293b;
+            color: #ffffff;
             border: none;
-            padding: 18px;
-            border-radius: 12px;
+            padding: 20px;
+            border-radius: 16px;
             font-size: 18px;
             font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
-            transition: transform 0.1s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.2s;
         }
         .large-done-btn:active {
             transform: scale(0.98);
@@ -440,20 +462,22 @@ export default function FreeTalkView({ data, onNext }) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             background: transparent;
             border: none;
-            color: white;
+            color: #64748b;
             cursor: pointer;
         }
-        .icon-btn.start { color: var(--success); }
+        .icon-btn.start { color: #2563eb; }
         .icon-btn.start svg {
-            background: rgba(46, 213, 115, 0.2);
+            background: #eff6ff;
+            color: #2563eb;
             padding: 16px;
             border-radius: 50%;
-            width: 64px;
-            height: 64px;
+            width: 72px;
+            height: 72px;
             transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);
         }
         
         .spin { animation: spin 2s linear infinite; }
@@ -469,18 +493,22 @@ export default function FreeTalkView({ data, onNext }) {
         }
         
         .finish-link {
-            background: transparent;
+            background: #f8fafc;
             border: none;
-            color: var(--text-secondary);
-            padding: 16px;
+            color: #64748b;
+            padding: 20px;
             font-size: 14px;
-            text-decoration: underline;
+            font-weight: 600;
+            text-decoration: none;
+            border-top: 1px solid #f1f5f9;
+            width: 100%;
+            text-align: center;
         }
         
         .speaking-spacer {
             height: 24px;
             font-size: 14px;
-            color: var(--text-secondary);
+            color: #94a3b8;
         }
       `}</style>
         </div>

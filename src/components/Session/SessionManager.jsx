@@ -65,7 +65,7 @@ export default function SessionManager({ topic, onExit, onError }) {
                   .spin-loader {
                     width: 40px;
                     height: 40px;
-                    border: 3px solid rgba(255,255,255,0.1);
+                    border: 4px solid #f1f5f9;
                     border-top-color: var(--accent-primary);
                     border-radius: 50%;
                     animation: spin 1s linear infinite;
@@ -111,7 +111,7 @@ export default function SessionManager({ topic, onExit, onError }) {
           align-items: center;
           justify-content: space-between;
           padding: 0 16px;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
+          border-bottom: 1px solid #f1f5f9;
         }
         .nav-btn {
           background: transparent;
@@ -126,7 +126,7 @@ export default function SessionManager({ topic, onExit, onError }) {
         .step {
           width: 32px;
           height: 4px;
-          background: rgba(255,255,255,0.1);
+          background: #f1f5f9;
           border-radius: 2px;
           transition: background 0.3s;
         }

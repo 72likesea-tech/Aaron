@@ -118,7 +118,8 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
         .topic-card:hover {
           transform: translateY(-2px);
           border-color: var(--accent-primary);
-          background: rgba(36, 36, 62, 0.8);
+          background: #ffffff;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
         .topic-icon {
           font-size: 24px;
@@ -138,23 +139,22 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
         }
         .topic-type {
           font-size: 11px;
-          color: var(--accent-secondary);
+          color: var(--accent-primary);
           text-transform: uppercase;
           letter-spacing: 0.5px;
           font-weight: 700;
-          color: #a78bfa; /* Improved contrast */
         }
         .topic-source {
           font-size: 12px;
-          color: #34d399; /* Distinct color for source */
+          color: var(--success);
           font-weight: 500;
           margin-top: 2px;
         }
         .topic-info h3 {
           font-size: 16px;
-          font-weight: 500;
+          font-weight: 600;
           line-height: 1.4;
-          color: #ffffff;
+          color: var(--text-primary);
         }
         .secondary-btn {
           background: transparent;

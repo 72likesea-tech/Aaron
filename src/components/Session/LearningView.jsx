@@ -98,18 +98,31 @@ export default function LearningView({ data, onNext }) {
           font-size: 18px;
           color: var(--text-primary);
         }
+        .mission-text {
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+        .scenario-card {
+            width: 100%;
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            border: 1px solid #e2e8f0;
+        }
         .card {
-          background: var(--bg-card);
-          padding: 20px;
-          border-radius: var(--radius-md);
+          background: #ffffff;
+          padding: 24px;
+          border-radius: var(--radius-lg);
           display: flex;
           flex-direction: column;
           gap: 16px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         .expression-item h3 {
-          color: #ffffff; /* Bright white for English text */
+          color: var(--text-primary); /* Dark text for English text */
           font-size: 18px;
           font-weight: 600;
           margin-bottom: 8px;
@@ -148,12 +161,12 @@ export default function LearningView({ data, onNext }) {
             transform: scale(0.98);
         }
         .expression-item {
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
             cursor: pointer;
             transition: background 0.2s;
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 12px;
+            padding: 16px;
         }
         .expression-item:hover {
             background: rgba(255,255,255,0.05);
