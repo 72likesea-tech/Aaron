@@ -376,8 +376,8 @@ export const OpenAIService = {
         try {
             const prompt = `The user is studying the English expression: "${expression}".
             They have a follow-up question: "${question}".
-            Provide a very brief, helpful answer in Korean focusing on word choice, imagery, or usage.
-            Keep the answer under 2-3 sentences.`;
+            Provide a brief but specific answer in Korean focusing on the 'inherent core meaning and imagery' (내재된 근본적 의미와 이미지) of the verbs and adjectives involved.
+            Avoid situational fluff, but ensure the core concept is explained clearly and specifically.`;
 
             const completion = await callOpenAI(
                 [
