@@ -21,6 +21,10 @@ export default function FreeTalkView({ data, onNext }) {
 
     const audioRef = useRef(null);
     const voicesChangedListener = useRef(false);
+    const chatEndRef = useRef(null);
+    const mediaRecorder = useRef(null);
+    const audioChunks = useRef([]);
+    const isSessionActiveRef = useRef(false);
 
     useEffect(() => {
         isSessionActiveRef.current = isSessionActive;
