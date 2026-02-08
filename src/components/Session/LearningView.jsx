@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { BookOpen, HelpCircle, Volume2, MessageCircle, Send, Loader2, Mic } from 'lucide-react';
+import { BookOpen, HelpCircle, Volume2, MessageCircle, Loader2, Mic } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 import { OpenAIService } from '../../services/OpenAIService';
 import BlindText from '../UI/BlindText';
@@ -61,25 +61,16 @@ export default function LearningView({ data, onNext }) {
     }
   };
 
-  const handleQaChange = (index, value) => {
-    setQaStates(prev => ({
-      ...prev,
-      [index]: { ...prev[index], question: value }
-    }));
-  };
-
-  const submitQuestion = async (e, index, expression, explicitText = null) => {
-    if (e) e.stopPropagation();
-    const question = explicitText || qaStates[index]?.question;
-    if (!question || !question.trim()) return;
+  const submitQuestion = async (index, expression, explicitText) => {
+    if (!explicitText || !explicitText.trim()) return;
 
     setQaStates(prev => ({
       ...prev,
-      [index]: { ...prev[index], isAsking: true, question: question }
+      [index]: { ...prev[index], isAsking: true, question: explicitText }
     }));
 
     try {
-      const answer = await OpenAIService.askAboutExpression(expression, question);
+      const answer = await OpenAIService.askAboutExpression(expression, explicitText);
       setQaStates(prev => ({
         ...prev,
         [index]: { ...prev[index], answer, isAsking: false }
@@ -119,7 +110,7 @@ export default function LearningView({ data, onNext }) {
         try {
           const transcribedText = await OpenAIService.transcribeAudio(audioBlob);
           if (transcribedText.trim()) {
-            await submitQuestion(null, index, expression, transcribedText);
+            await submitQuestion(index, expression, transcribedText);
           } else {
             setQaStates(prev => ({
               ...prev,
@@ -182,27 +173,23 @@ export default function LearningView({ data, onNext }) {
 
             <div className="qa-section" onClick={(e) => e.stopPropagation()}>
               <div className="qa-input-row">
-                <input
-                  type="text"
-                  placeholder="표현에 대해 물어보세요..."
-                  value={qaStates[i]?.question || ''}
-                  onChange={(e) => handleQaChange(i, e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && submitQuestion(e, i, exp.text)}
-                  disabled={qaStates[i]?.isAsking || qaStates[i]?.isRecording}
-                />
+                <div className="qa-visual-status">
+                  {qaStates[i]?.isAsking ? (
+                    <div className="asking-loader"><Loader2 size={18} className="spin" /> <span>분석 중...</span></div>
+                  ) : qaStates[i]?.isRecording ? (
+                    <div className="recording-label">음성 질문 대기 중...</div>
+                  ) : qaStates[i]?.question ? (
+                    <div className="question-preview">Q: {qaStates[i]?.question}</div>
+                  ) : (
+                    <div className="placeholder-text">마이크를 눌러 질문하세요</div>
+                  )}
+                </div>
                 <button
-                  className={`qa-mic-btn ${qaStates[i]?.isRecording ? 'recording' : ''}`}
+                  className={`qa-mic-btn-large ${qaStates[i]?.isRecording ? 'recording' : ''}`}
                   onClick={(e) => toggleMic(e, i, exp.text)}
                   disabled={qaStates[i]?.isAsking}
                 >
-                  <Mic size={18} />
-                </button>
-                <button
-                  className="qa-submit"
-                  onClick={(e) => submitQuestion(e, i, exp.text)}
-                  disabled={qaStates[i]?.isAsking || qaStates[i]?.isRecording}
-                >
-                  {qaStates[i]?.isAsking ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
+                  {qaStates[i]?.isAsking ? <Loader2 size={24} className="spin" /> : <Mic size={24} />}
                 </button>
               </div>
               {qaStates[i]?.answer && (
@@ -293,48 +280,41 @@ export default function LearningView({ data, onNext }) {
         }
         .qa-input-row {
           display: flex;
-          gap: 8px;
-        }
-        .qa-input-row input {
-          flex: 1;
-          background: var(--bg-secondary);
-          border: 1px solid rgba(128,128,128,0.2);
-          border-radius: 8px;
-          padding: 10px 14px;
-          font-size: 13px;
-          color: var(--text-primary);
-          outline: none;
-        }
-        .qa-input-row input:disabled { opacity: 0.7; cursor: not-allowed; }
-        .qa-mic-btn {
-          background: var(--bg-secondary);
-          color: var(--text-secondary);
-          border: 1px solid rgba(128,128,128,0.2);
-          border-radius: 8px;
-          width: 40px;
-          display: flex;
           align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
+          justify-content: space-between;
+          background: var(--bg-secondary);
+          padding: 12px 16px;
+          border-radius: 12px;
+          gap: 16px;
         }
-        .qa-mic-btn.recording {
-          background: var(--error);
-          color: white;
-          border-color: var(--error);
-          animation: pulse-red 1.5s infinite;
+        .qa-visual-status {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-secondary);
         }
-        .qa-submit {
+        .placeholder-text { opacity: 0.6; }
+        .recording-label { color: var(--error); font-weight: 700; animation: flash 1s infinite; }
+        .asking-loader { display: flex; align-items: center; gap: 8px; color: var(--accent-primary); font-weight: 600; }
+        .question-preview { color: var(--text-primary); font-weight: 500; font-style: italic; }
+
+        .qa-mic-btn-large {
           background: var(--accent-primary);
           color: white;
           border: none;
-          border-radius: 8px;
-          width: 40px;
+          border-radius: 50%;
+          width: 56px;
+          height: 56px;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: opacity 0.2s;
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+          transition: all 0.2s;
         }
-        .qa-submit:disabled { opacity: 0.5; }
+        .qa-mic-btn-large.recording {
+          background: var(--error);
+          animation: pulse-red 1.5s infinite;
+        }
+        .qa-mic-btn-large:disabled { opacity: 0.5; }
         
         .qa-answer {
           margin-top: 12px;
@@ -354,9 +334,10 @@ export default function LearningView({ data, onNext }) {
           margin: 0;
         }
 
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
