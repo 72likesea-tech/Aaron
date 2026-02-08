@@ -90,7 +90,7 @@ export const OpenAIService = {
       - keyExpressions: array of ${sentenceCount} objects { 
           text: string (English sentence), 
           translation: string (Korean), 
-          explanation: string (A simple Korean explanation focusing on the 'core meaning' (근본적 의미/이미지) of the key verbs or nouns used and why they make sense in this context from an English speaker's perspective. Do not include nuance (뉘앙스) explanations.)
+          explanation: string (A very brief Korean explanation focusing ONLY on the inherent 'core meaning' (근본적 의미/이미지) of the key words. Do not provide any additional explanations, context, or nuance.)
         }
       - shadowingSentences: array of 3 objects { text: string (English sentence), translation: string (Korean translation) }
       - tips: string (One sentence advice in English)
