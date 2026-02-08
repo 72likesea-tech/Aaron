@@ -90,7 +90,7 @@ export const OpenAIService = {
       - keyExpressions: array of ${sentenceCount} objects { 
           text: string (English sentence), 
           translation: string (Korean), 
-          explanation: string (문장에 사용된 주요 동사와 형용사의 '내재된 근본적 의미와 이미지'를 중심으로, 해당 단어가 가진 뿌리 개념을 한글로 간략히 그러나 구체적으로 설명. 부가적 설명이나 상황 묘사는 배제하되 핵심 의미는 뚜렷하게 전달할 것.)
+          explanation: string (문장에 사용된 주요 동사와 형용사의 '내재된 근본적 의미와 이미지'만을 한글로 간략히 그러나 구체적으로 설명. 상황 묘사, 뉘앙스, 문법 등 어떠한 부가적 설명도 절대 하지 말 것.)
         }
       - shadowingSentences: array of 3 objects { text: string (English sentence), translation: string (Korean translation) }
       - tips: string (One sentence advice in English)
@@ -376,8 +376,8 @@ export const OpenAIService = {
         try {
             const prompt = `The user is studying the English expression: "${expression}".
             They have a follow-up question: "${question}".
-            Provide a brief but specific answer in Korean focusing on the 'inherent core meaning and imagery' (내재된 근본적 의미와 이미지) of the verbs and adjectives involved.
-            Avoid situational fluff, but ensure the core concept is explained clearly and specifically.`;
+            Provide a brief but specific answer in Korean focusing ONLY on the 'inherent core meaning and imagery' (내재된 근본적 의미와 이미지) of the verbs and adjectives involved. 
+            Strictly omit any situational descriptions, usage tips, or other supplementary explanations.`;
 
             const completion = await callOpenAI(
                 [
