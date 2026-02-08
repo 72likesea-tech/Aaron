@@ -6,6 +6,7 @@ import BlindText from '../UI/BlindText';
 
 export default function FreeTalkView({ data, onNext }) {
     const { settings } = useUser();
+    const fontScale = settings.fontScales?.FreeTalkView || 1.0;
     const currentVoice = settings?.voice || 'shimmer';
 
     const [messages, setMessages] = useState([
@@ -224,16 +225,19 @@ export default function FreeTalkView({ data, onNext }) {
     };
 
     return (
-        <div className="freetalk-container">
+        <div className="freetalk-container" style={{ '--font-scale': fontScale }}>
             <header className="chat-header">
-                <h2>Real-time Free Talk</h2>
-                <div className="status-indicator">
-                    {isSessionActive ? (
-                        <span className="live">● LIVE</span>
-                    ) : (
-                        <span className="paused">● Ready</span>
-                    )}
+                <div className="header-left">
+                    <h2>Real-time Free Talk</h2>
+                    <div className="status-indicator">
+                        {isSessionActive ? (
+                            <span className="live">● LIVE</span>
+                        ) : (
+                            <span className="paused">● Ready</span>
+                        )}
+                    </div>
                 </div>
+                <FontSizeController pageName="FreeTalkView" />
             </header>
 
             <div className="chat-window">
@@ -329,14 +333,15 @@ export default function FreeTalkView({ data, onNext }) {
           background: var(--bg-main);
         }
         .chat-header {
-            padding: 20px 16px;
+            padding: 16px;
             background: var(--bg-main);
             border-bottom: 1px solid rgba(128,128,128,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .chat-header h2 { font-size: 18px; color: var(--text-primary); font-weight: 700; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .chat-header h2 { font-size: calc(18px * var(--font-scale)); color: var(--text-primary); font-weight: 700; }
         .live { color: var(--success); font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 4px; }
         .paused { color: var(--text-secondary); font-size: 13px; font-weight: 500; }
         
@@ -395,7 +400,7 @@ export default function FreeTalkView({ data, onNext }) {
         .bubble {
             padding: 12px 16px;
             border-radius: 18px;
-            font-size: 16px;
+            font-size: calc(16px * var(--font-scale));
             line-height: 1.6;
             width: fit-content;
         }

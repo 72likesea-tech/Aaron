@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MockAIService } from '../services/MockAIService';
 import { useUser } from '../context/UserContext';
+import FontSizeController from './UI/FontSizeController';
 import { RefreshCw, ArrowRight } from 'lucide-react';
 
 export default function TopicSelector({ onSelect, onError, onInterpretationClick }) {
@@ -38,11 +39,16 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
     }
   };
 
+  const fontScale = settings.fontScales?.TopicSelector || 1.0;
+
   return (
-    <div className="screen-container">
-      <header className="header">
-        <h1>오늘의 주제</h1>
-        <p>학습할 주제를 선택해주세요</p>
+    <div className="topic-selector-container" style={{ '--font-scale': fontScale }}>
+      <header className="page-header">
+        <div className="header-top">
+          <h1>Learning Topics</h1>
+          <FontSizeController pageName="TopicSelector" />
+        </div>
+        <p>어떤 주제로 대화해볼까요?</p>
       </header>
 
       {loading ? (
@@ -76,13 +82,17 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
       </button>
 
       <style>{`
-        .screen-container {
+        .topic-selector-container {
           padding: 24px;
           display: flex;
           flex-direction: column;
           gap: 24px;
           height: 100vh;
         }
+        .page-header { margin-bottom: 24px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .page-header h1 { font-size: calc(28px * var(--font-scale)); font-weight: 800; color: var(--text-primary); }
+        .page-header p { font-size: calc(16px * var(--font-scale)); color: var(--text-secondary); }
         .loading-state, .empty-state {
           flex: 1;
           display: flex;
@@ -146,13 +156,13 @@ export default function TopicSelector({ onSelect, onError, onInterpretationClick
           font-weight: 700;
         }
         .topic-source {
-          font-size: 16px;
+          font-size: calc(16px * var(--font-scale));
           color: var(--success);
           font-weight: 600;
           margin-top: 4px;
         }
         .topic-info h3 {
-          font-size: 22px;
+          font-size: calc(22px * var(--font-scale));
           font-weight: 700;
           line-height: 1.4;
           color: var(--text-primary);

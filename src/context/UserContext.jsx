@@ -18,6 +18,15 @@ export function UserProvider({ children }) {
             themeMode: 'light', // 'light' or 'dark'
             customBgColor: '#ffffff',
             customTextColor: '#1a1a1a',
+            fontScales: {
+                TopicSelector: 1.0,
+                MissionView: 1.0,
+                LearningView: 1.0,
+                ShadowingView: 1.0,
+                FreeTalkView: 1.0,
+                FeedbackView: 1.0,
+                SettingsScreen: 1.0
+            }
         };
     });
 

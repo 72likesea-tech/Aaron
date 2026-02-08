@@ -3,6 +3,7 @@ import { Mic, Play, ArrowRight, RotateCcw } from 'lucide-react';
 import { OpenAIService } from '../../services/OpenAIService';
 import { useUser } from '../../context/UserContext';
 import BlindText from '../UI/BlindText';
+import FontSizeController from '../UI/FontSizeController';
 
 export default function ShadowingView({ data, onNext }) {
   // Determine sentences: data.shadowingSentences (new format) or mapped keyExpressions (fallback)
@@ -111,8 +112,13 @@ export default function ShadowingView({ data, onNext }) {
   }, [assessSpeech]); // assessSpeech depends on currentSentence, so it changes.
 
 
+  const fontScale = settings.fontScales?.ShadowingView || 1.0;
+
   return (
-    <div className="shadowing-step-container">
+    <div className="shadowing-step-container" style={{ '--font-scale': fontScale }}>
+      <div className="page-header-ctrl">
+        <FontSizeController pageName="ShadowingView" />
+      </div>
       <header className="step-header">
         <h2>Step 3. Shadowing</h2>
         <p>문장을 듣고 정확하게 따라 말해보세요 ({currentIndex + 1}/{sentences.length})</p>
@@ -159,12 +165,10 @@ export default function ShadowingView({ data, onNext }) {
             flex-direction: column;
             height: 100%;
             padding: 24px;
-            gap: 24px;
-            align-items: center;
-        }
+        .page-header-ctrl { width: 100%; display: flex; justify-content: flex-end; }
         .step-header { text-align: center; }
-        .step-header h2 { color: var(--accent-primary); margin-bottom: 8px; }
-        .step-header p { color: var(--text-secondary); font-size: 14px; }
+        .step-header h2 { color: var(--accent-primary); margin-bottom: 8px; font-size: calc(24px * var(--font-scale)); }
+        .step-header p { color: var(--text-secondary); font-size: calc(14px * var(--font-scale)); }
 
         .target-card {
             background: var(--bg-main);
@@ -180,7 +184,7 @@ export default function ShadowingView({ data, onNext }) {
             margin-top: 20px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
-        .target-text { font-size: 24px; font-weight: 500; line-height: 1.4; color: var(--text-primary); }
+        .target-text { font-size: calc(24px * var(--font-scale)); font-weight: 500; line-height: 1.4; color: var(--text-primary); }
         .target-translation { display: none; }
         .play-btn {
             width: 64px;

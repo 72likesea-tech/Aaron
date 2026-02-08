@@ -3,10 +3,12 @@ import { BookOpen, HelpCircle, Volume2 } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 import { OpenAIService } from '../../services/OpenAIService';
 import BlindText from '../UI/BlindText';
+import FontSizeController from '../UI/FontSizeController';
 
 export default function LearningView({ data, onNext }) {
   const { keyExpressions, tips } = data || {};
   const { settings } = useUser();
+  const fontScale = settings.fontScales?.LearningView || 1.0;
   const [playingIndex, setPlayingIndex] = useState(null);
 
   const playTwice = async (text, index) => {
@@ -50,7 +52,10 @@ export default function LearningView({ data, onNext }) {
   };
 
   return (
-    <div className="learning-container">
+    <div className="learning-container" style={{ '--font-scale': fontScale }}>
+      <div className="page-header-ctrl">
+        <FontSizeController pageName="LearningView" />
+      </div>
       <div className="section-header">
         <BookOpen size={24} color="var(--accent-primary)" />
         <h2>주요 표현 익히기</h2>
@@ -89,13 +94,9 @@ export default function LearningView({ data, onNext }) {
           flex-direction: column;
           gap: 20px;
         }
-        .section-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
+        .page-header-ctrl { width: 100%; display: flex; justify-content: flex-end; margin-bottom: 8px; }
         .section-header h2 {
-          font-size: 18px;
+          font-size: calc(18px * var(--font-scale));
           color: var(--text-primary);
         }
         .mission-text {
@@ -123,16 +124,17 @@ export default function LearningView({ data, onNext }) {
         }
         .expression-item h3 {
           color: var(--text-primary); /* Dark text for English text */
-          font-size: 18px;
+          font-size: calc(18px * var(--font-scale));
           font-weight: 600;
           margin-bottom: 8px;
           letter-spacing: 0.5px;
         }
         .expression-item p {
           color: var(--text-secondary);
-          font-size: 15px;
+          font-size: calc(15px * var(--font-scale));
           line-height: 1.5;
         }
+        .question-card p { font-size: calc(16px * var(--font-scale)); }
         /* Removed duplicate expression-item style */
         .expression-item:last-child {
             border-bottom: none;

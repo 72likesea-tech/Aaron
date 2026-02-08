@@ -1,11 +1,18 @@
 import { Flag, Play, Target } from 'lucide-react';
 import BlindText from '../UI/BlindText';
+import FontSizeController from '../UI/FontSizeController';
+import { useUser } from '../../context/UserContext';
 
 export default function MissionView({ data, onNext }) {
   const { mission, missionTranslation, scenario, scenarioTranslation } = data || {};
+  const { settings } = useUser();
+  const fontScale = settings.fontScales?.MissionView || 1.0;
 
   return (
-    <div className="mission-container">
+    <div className="mission-container" style={{ '--font-scale': fontScale }}>
+      <div className="page-header-ctrl">
+        <FontSizeController pageName="MissionView" />
+      </div>
       <header className="hero-section">
         <div className="icon-circle">
           <Flag size={32} />
@@ -20,7 +27,7 @@ export default function MissionView({ data, onNext }) {
           <Target size={20} className="accent-icon" />
           <h3>상황 설정 (Scenario)</h3>
         </div>
-        <p>{scenario || "Situation description..."}</p>
+        <p className="scenario-desc">{scenario || "Situation description..."}</p>
         {scenarioTranslation && <BlindText text={scenarioTranslation} />}
       </div>
 
@@ -29,26 +36,16 @@ export default function MissionView({ data, onNext }) {
       </button>
 
       <style>{`
-        .center-text {
-            text-align: center;
-            width: 100%;
-        }
-        .mission-container {
-          padding: 32px 24px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          height: 100%;
-          gap: 32px;
-        }
+        .page-header-ctrl { width: 100%; display: flex; justify-content: flex-end; }
         .hero-section {
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
             gap: 16px;
-            margin-top: 40px;
+            margin-top: 10px;
         }
+        .hero-section h1 { font-size: calc(24px * var(--font-scale)); }
         .icon-circle {
             width: 80px;
             height: 80px;
@@ -61,11 +58,13 @@ export default function MissionView({ data, onNext }) {
             box-shadow: 0 10px 20px rgba(118, 75, 162, 0.5);
         }
         .mission-text {
-            font-size: 20px;
+            font-size: calc(20px * var(--font-scale));
             font-weight: 500;
             line-height: 1.4;
             color: var(--text-primary);
         }
+        .scenario-card h3 { font-size: calc(18px * var(--font-scale)); }
+        .scenario-desc { font-size: calc(16px * var(--font-scale)); }
         .scenario-card {
             width: 100%;
             background: var(--bg-card);
