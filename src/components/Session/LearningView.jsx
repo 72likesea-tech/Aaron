@@ -289,7 +289,7 @@ export default function LearningView({ data, onNext }) {
         }
         .qa-visual-status {
             flex: 1;
-            font-size: 13px;
+            font-size: calc(16px * var(--font-scale));
             color: var(--text-secondary);
         }
         .placeholder-text { opacity: 0.6; }
@@ -328,7 +328,7 @@ export default function LearningView({ data, onNext }) {
         }
         .ai-icon { color: var(--accent-primary); margin-top: 2px; }
         .qa-answer p {
-          font-size: 13px;
+          font-size: calc(16px * var(--font-scale));
           line-height: 1.5;
           color: var(--text-primary);
           margin: 0;
